@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>السوق الإلكتروني</title>
+<!-- إضافة خط من Google Fonts يدعم العربية -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet" />
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Cairo', Arial, Tahoma, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    margin-top: 60px;
+    position: relative;
+}
+header {
+    position:fixed; 
+    width: 100%;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    top: 0px;
+}
+header h1 {
+    font-size: 1.2em;
+}
+/* زر المدير صغير وموقعه على اليسار */
+#adminFixedBtn {
+    display: none; /* يظهر عند النزول للأسفل */
+    position: fixed;
+    bottom: 0;
+    right: 7px; /* يسارا قليلا */
+    width: 15px; /* ربع الحجم السابق تقريبًا */
+    height: 8px
+    padding: 6px 10px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Cairo', Arial, Tahoma, sans-serif;
+    font-size: 4px;
+    cursor: pointer;
+    color: #555;
+    transition: background-color 0.3s, color 0.3s;
+    z-index: 9999;
+}
+#adminFixedBtn:hover {
+    background-color: #eee;
+    color: #000;
+}
+/* زر السلة عائم */
+#cartFloatingButton {
+    position: fixed;
+    bottom: 22px;
+    left: 15px;
+    background-color: #0f7b5a; /* لون متناسق أكثر */
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+#cartFloatingButton:hover {
+    background-color: #388E3C; /* لون أغمق عند المرور */
+}
+/* توسعة عرض المواد في وضع المدير */
+#adminPanel {
+    display: none; 
+    position: fixed; 
+    top: 50px; 
+    right: 50px; 
+    background: #fff; 
+    padding: 20px; 
+    border-radius: 8px; 
+    max-height: 80%; 
+    overflow: auto; 
+    z-index: 9999; 
+    width: 90%; /* عرض أكبر مناسب للشاشة */
+    max-width: 900px; /* تحديد الحد الأقصى للعرض */
+}
+/* تقليل عرض مربع الكمية */
+.quantity-controls {
+    display: flex;
+    width: 20px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+/* أزرار +/- */
+.quantity-controls button {
+    padding: 7px 8px; /* تقليل الحجم */
+    font-size: 1em;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    min-width: 30px; /* عرض ثابت للزر */
+}
+.quantity-controls button:hover {
+    background-color: #0056b3;
+}
+/* مربع الكمية */
+#qtyInput {
+    width: 20px; /* تقليل العرض */
+    height: 30px; /* الحفاظ على الارتفاع مناسب */
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 0 5px;
+    font-size: 1em;
+}
+
+/* باقي الأنماط كما هي */
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Cairo', Arial, Tahoma, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+header {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+header h1 {
+    font-size: 1.2em;
+}
+#searchInput {
+    display: flex;
+    position:fixed; 
+    top: 52px;
+    left: 30px;
+    margin-bottom: 15px;
+    margin: 0 auto;
+    width: 90%;
+    max-width: 300px;
+    padding: 13px 17px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 2px solid #007bff;
+    outline: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+#searchInput:focus {
+    border-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+.products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.product {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    transition: transform 0.2s;
+}
+.product:hover {
+    transform: scale(1.02);
+}
+.product h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    text-align: center;
+}
+.price {
+    color: #e60000;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width:100%;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    mrargin-right: 10px;
+}
+.btn {
+    display: flex;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}
+.btn:hover {
+    background-color: #0056b3;
+}
+footer {
+    background-color: #343a40;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-top: 40px;
+}
+#cartContainer {
+    margin-top: 40px;
+}
+#cartItems {
+    list-style: none;
+    padding: 0;
+    max-width: 600px;
+    margin: auto;
+}
+#cartItems li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+}
+#totalPrice {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 15px;
+    font-size: 1.2em;
+}
+#cartPage {
+    display: none;
+    padding: 20px;
+}
+#cartPage.active {
+    display: block;
+}
+#orderForm {
+    display: none;
+    margin-top: 20px;
+}
+#orderForm.active {
+    display: block;
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>السوق الإلكتروني</h1>
+</header>
+
+<!-- زر المدير يظهر عند النزول لأسفل -->
+<button id="adminFixedBtn" onclick="promptAdmin()">وضع المدير</button>
+
+<!-- زر السلة عائم -->
+<button id="cartFloatingButton" onclick="showCartPage()">
+    🛒 السلة <span id="cartCount">0</span>
+</button>
+
+<!-- المحتوى الرئيسي -->
+<div id="mainContent" class="container">
+    <h2 style="text-align:center; margin-bottom: 14px; margin-top: 8px;">منتجاتنا</h2>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." />
+    </div>
+    <div class="products" id="productsContainer"></div>
+</div>
+
+<!-- صفحة السلة -->
+<div id="cartPage">
+    <h2 style="text-align:center;">السلة</h2>
+    <ul id="cartItems"></ul>
+    <div id="totalPrice">المجموع النهائي: 0 ل.س</div>
+    <button onclick="showMain()" style="margin-top:15px; padding:10px 20px; background-color:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;">العودة للمنتجات</button>
+    <button id="confirmOrderBtn" style="margin-top:15px; padding:10px 20px; background-color:#28a745; color:#fff; border:none; border-radius:4px; cursor:pointer;">تأكيد الطلب</button>
+</div>
+
+<!-- حقل التوصيل -->
+<div id="orderForm">
+    <h3>املأ بيانات التوصيل</h3>
+    <label>العنوان:</label>
+    <input type="text" id="deliveryAddress" placeholder="أدخل عنوانك" />
+    <label>رقم الهاتف:</label>
+    <input type="text" id="phoneNumber" placeholder="أدخل رقم هاتفك" />
+</div>
+
+<!-- لوحة إدارة المنتجات للمدير -->
+<div id="adminPanel" style="display:none; position:fixed; top:50px; right:5px; background:#fff; padding:20px; border-radius:8px; max-height:85%; overflow:auto; z-index:9999; width:95%;">
+    <h3>إدارة المنتجات</h3>
+    <div id="adminProducts"></div>
+    <button onclick="addProduct()">إضافة مادة جديدة</button>
+    <button onclick="closeAdmin()">إغلاق</button>
+</div>
+
+<!-- حقوق النشر -->
+<footer>
+    <p>© 2025 السوق الإلكتروني. جميع الحقوق محفوظة.</p>
+</footer>
+
+<script>
+const items = [
+    { name: "سكر فرط", quantity: 308, value: 6500 },
+    { name: "ملح", quantity: 371, value: 1540 },
+    { name: "بيض", quantity: 12, value: 25000 },
+    { name: "زيت دوار الشمس", quantity: 356, value: 17600 },
+    { name: "زيت زيتون", quantity: 267, value: 60500 },
+    { name: "زيتون", quantity: 242, value: 15400 },
+    { name: "مرتديلا بسمة", quantity: 142, value: 22000 },
+    { name: "مرتديلا زينة", quantity: 160, value: 24200 },
+    { name: "مرتديلا هنا", quantity: 160, value: 26400 },
+    { name: "مرتديلا همسة صيف", quantity: 216, value: 13200 },
+    { name: "سردين ليو", quantity: 600, value: 5500 },
+    { name: "سردين المغربي", quantity: 509, value: 5500 },
+    { name: "سردين الدرة", quantity: 588, value: 6050 },
+    { name: "سكر", quantity: 393, value: 8800 },
+    { name: "مربى الدرة", quantity: 192, value: 19800 },
+    { name: "زبدة الفول السوداني الدرة", quantity: 83, value: 19800 },
+    { name: "عود تنظيف أذن", quantity: 100, value: 3300 },
+    { name: "جبنة شركسية", quantity: 31, value: 58000 },
+    { name: "محارم كومفورت", quantity: 241, value: 8800 },
+    { name: "باور بانك شادو باور", quantity: 166, value: 165000 },
+    { name: "ماجي ظرف", quantity: 990, value: 1100 },
+    { name: "ماجي مكعب", quantity: 678, value: 1650 },
+    { name: "رز سيدي هشام", quantity: 502, value: 9900 },
+    { name: "دبس بندورة", quantity: 94, value: 2200 },
+    { name: "تمر خلاص", quantity: 250, value: 3300 },
+    { name: "دبس رمان فرط", quantity: 80, value: 27500 },
+    { name: "سيتي كافيه", quantity: 1000, value: 1100 },
+    { name: "طون ليو", quantity: 98, value: 12100 },
+    { name: "اندومي", quantity: 1980, value: 3300 },
+    { name: "شامبو أوليڤا", quantity: 150, value: 19800 },
+    { name: "معجون أسنان سووايت", quantity: 192, value: 11000 },
+    { name: "عصير سكويز", quantity: 663, value: 4400 },
+    { name: "عصير طبيعي", quantity: 20, value: 19800 },
+    { name: "شاي أكرك عجم ظروف", quantity: 200, value: 11000 },
+    { name: "شاي سيدي هشام ظروف", quantity: 200, value: 11000 },
+    { name: "شاي فرط همسة صيف", quantity: 35, value: 111000 },
+    { name: "بسكويت شاي", quantity: 31, value: 9900 },
+    { name: "سائل جلي نورا ٣٨٠ مل", quantity: 33, value: 12100 },
+    { name: "صابون ماتيز", quantity: 29, value: 4000 },
+    { name: "قهوة بن الحموي ٢٤٠ غ", quantity: 0, value: 13200 }
+];
+
+let cart = [];
+let filteredItems = [...items];
+
+function renderProducts() {
+    const container = document.getElementById('productsContainer');
+    container.innerHTML = '';
+    filteredItems.forEach((item) => {
+        const realIndex = items.indexOf(item);
+        const div = document.createElement('div');
+        div.className='product';
+        div.innerHTML = `
+            <h3>${item.name}</h3>
+            <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
+            <div class="quantity-controls">
+                <button onclick="decreaseQty(${realIndex})">-</button>
+                <input type="text" id="qtyInput${realIndex}" value="1" readonly />
+                <button onclick="increaseQty(${realIndex}, ${item.quantity})">+</button>
+            </div>
+            <a href="#" class="btn" onclick="addToCart(event, ${realIndex})">إضافة إلى السلة</a>
+        `;
+        container.appendChild(div);
+    });
+}
+
+document.getElementById('searchInput').addEventListener('input', () => {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (q === "") {
+        filteredItems = [...items];
+    } else {
+        filteredItems = items.filter(i => i.name.toLowerCase().includes(q));
+    }
+    renderProducts();
+});
+
+// عرض المنتجات عند بداية الموقع
+renderProducts();
+
+function increaseQty(index, max) {
+    const input = document.getElementById(`qtyInput${index}`);
+    let val = parseInt(input.value);
+    if (val < max) {
+        input.value = val + 1;
+    } else {
+        alert('لا يمكن شراء أكثر من الكمية المتوفرة');
+    }
+}
+
+function decreaseQty(index) {
+    const input = document.getElementById(`qtyInput${index}`);
+    let val = parseInt(input.value);
+    if (val > 1) {
+        input.value = val - 1;
+    }
+}
+
+function addToCart(e, index) {
+    e.preventDefault();
+    const qty = parseInt(document.getElementById(`qtyInput${index}`).value);
+    const item = items[index];
+    const existingIndex = cart.findIndex(c => c.index === index);
+    if (existingIndex !== -1) {
+        if (cart[existingIndex].quantity + qty <= item.quantity) {
+            cart[existingIndex].quantity += qty;
+        } else {
+            alert('الكمية الإجمالية تتجاوز الكمية المتوفرة');
+            return;
+        }
+    } else {
+        cart.push({ index, name: item.name, value: item.value, quantity: qty, max: item.quantity });
+    }
+    updateCartCount();
+    alert('تمت إضافة المنتج إلى السلة');
+}
+
+function updateCartCount() {
+    const totalItems = cart.reduce((sum, c) => sum + c.quantity, 0);
+    document.getElementById('cartCount').innerText = totalItems;
+}
+
+function showCartPage() {
+    document.getElementById('mainContent').style.display='none';
+    document.getElementById('cartPage').style.display='block';
+    renderCart();
+    document.getElementById('orderForm').classList.remove('active');
+}
+
+function showMain() {
+    document.getElementById('mainContent').style.display='block';
+    document.getElementById('cartPage').style.display='none';
+    document.getElementById('orderForm').classList.remove('active');
+}
+
+function renderCart() {
+    const container = document.getElementById('cartItems');
+    container.innerHTML = '';
+    let total = 0;
+    cart.forEach((item, index) => {
+        total += item.value * item.quantity;
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <strong>${item.name}</strong><br/>
+            السعر: ${item.value.toLocaleString()} ل.س<br/>
+            الكمية: ${item.quantity} <br/>
+            <button onclick="removeFromCart(${index})" style="margin-top:5px; padding:5px 10px; background-color:#e60000; color:#fff; border:none; border-radius:4px; cursor:pointer;">حذف</button>
+        `;
+        container.appendChild(li);
+    });
+    document.getElementById('totalPrice').innerText = `المجموع النهائي: ${total.toLocaleString()} ل.س`;
+}
+
+function removeFromCart(i) {
+    cart.splice(i,1);
+    renderCart();
+    updateCartCount();
+}
+
+document.getElementById('confirmOrderBtn').addEventListener('click', () => {
+    if (cart.length === 0) {
+        alert('السلة فارغة');
+        return;
+    }
+    document.getElementById('orderForm').classList.add('active');
+    document.getElementById('cartPage').style.display='none';
+});
+
+document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
+    const address = document.getElementById('deliveryAddress').value.trim();
+    const phone = document.getElementById('phoneNumber').value.trim();
+    if (!address || !phone) {
+        alert('يرجى ملء العنوان ورقم الهاتف');
+        return;
+    }
+    let message = 'طلب جديد:\n';
+    cart.forEach(item => {
+        message += `${item.name} - الكمية: ${item.quantity}\n`;
+    });
+    message += `\nالعنوان: ${address}\n`;
+    message += `رقم الهاتف: ${phone}\n`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappNumber = '+963936421060';
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    window.open(whatsappURL, '_blank');
+    // إعادة التهيئة
+    document.getElementById('deliveryAddress').value = '';
+    document.getElementById('phoneNumber').value = '';
+    document.getElementById('orderForm').classList.remove('active');
+    showMain();
+});
+
+// وظيفة وضع المدير تظهر عند النزول لأسفل
+const adminBtn = document.getElementById('adminFixedBtn');
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+        adminBtn.style.display = 'block';
+    } else {
+        adminBtn.style.display = 'none';
+    }
+});
+
+function promptAdmin() {
+    const pw = prompt('أدخل كلمة سر المدير:');
+    if (pw === 'admin123') {
+        document.getElementById('adminPanel').style.display='block';
+        renderAdminProducts();
+    } else {
+        alert('كلمة السر غير صحيحة');
+    }
+}
+
+function renderAdminProducts() {
+    const container = document.getElementById('adminProducts');
+    container.innerHTML = '';
+    items.forEach((item, i) => {
+        container.innerHTML += `
+        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:5px;">
+            <input style="width:100%; margin-bottom:5px;" placeholder="اسم المنتج" onchange="items[${i}].name=this.value" value="${item.name}"/>
+            <input style="width:100%; margin-bottom:5px;" type="number" placeholder="السعر" onchange="items[${i}].value=Number(this.value)" value="${item.value}"/>
+            <input style="width:100%; margin-bottom:5px;" type="number" placeholder="الكمية" onchange="items[${i}].quantity=Number(this.value)" value="${item.quantity}"/>
+            <button onclick="deleteItem(${i})" style="background:#e60000; color:#fff; border:none; padding:5px 8px; border-radius:4px; cursor:pointer;">حذف</button>
+        </div>
+        `;
+    });
+}
+
+function addProduct() {
+    items.push({name:'مادة جديدة', value:1000, quantity:100});
+    renderAdminProducts();
+    renderProducts();
+}
+
+function deleteItem(i) {
+    items.splice(i,1);
+    renderAdminProducts();
+    renderProducts();
+}
+
+function closeAdmin() {
+    document.getElementById('adminPanel').style.display='none';
+}
+</script>
+</body>
+</html>
