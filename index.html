@@ -494,7 +494,7 @@ document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
     }
     let message = 'طلب جديد:\n';
     cart.forEach(item => {
-        message += `${item.name} × ${item.quantity}\n`;
+        message += `${item.name} - ${item.quantity}\n`;
     });
     message += `ــــــــــــــــــ`
     message += `المجموع النهائي: ${total} ل.س`
