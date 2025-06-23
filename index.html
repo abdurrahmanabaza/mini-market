@@ -497,7 +497,7 @@ document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
         message += `${item.name} × ${item.quantity}\n`;
     });
     message += `ـــــــــــــــــــــــــــــــــــــ\n`
-    message += `المجموع النهائي: ${total} ل.س \n`
+    
     message += `\nالعنوان: ${address}\n`;
     message += `رقم الهاتف: ${phone}\n`;
     const encodedMessage = encodeURIComponent(message);
