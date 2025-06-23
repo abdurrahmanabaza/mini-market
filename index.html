@@ -42,7 +42,7 @@ header h1 {
     bottom: 0;
     right: 7px; /* يسارا قليلا */
     width: 15px; /* ربع الحجم السابق تقريبًا */
-    height: 8px
+    height: 8px;
     padding: 6px 10px;
     background-color: transparent;
     border: 1px solid #ccc;
@@ -52,7 +52,6 @@ header h1 {
     cursor: pointer;
     color: #555;
     transition: background-color 0.3s, color 0.3s;
-    z-index: 9999;
 }
 #adminFixedBtn:hover {
     background-color: #eee;
@@ -199,9 +198,7 @@ header h1 {
     justify-content: center;
     margin-bottom: 10px;
     margin-left: 10px;
-    mrargin-right: 10px;
-    left: 30px;
-    right: 30px;
+    margin-right: 10px;
 }
 .btn {
     display: flex;
@@ -485,6 +482,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', () => {
     document.getElementById('cartPage').style.display='none';
 });
 
+// عند الضغط على تأكيد الطلب
 document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
     const address = document.getElementById('deliveryAddress').value.trim();
     const phone = document.getElementById('phoneNumber').value.trim();
@@ -493,11 +491,14 @@ document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
         return;
     }
     let message = 'طلب جديد:\n';
+    let total = 0;
     cart.forEach(item => {
+        total += item.value * item.quantity;
         message += `${item.name} × ${item.quantity}\n`;
     });
-    message += `ـــــــــــــــــــــــــــــــــــــ\n`
-    
+    message += `ـــــــــــــــــــــــــــــــــــــ\n`;
+    // إضافة المجموع النهائي هنا
+    message += `المجموع النهائي: ${total.toLocaleString()} ل.س\n`;
     message += `\nالعنوان: ${address}\n`;
     message += `رقم الهاتف: ${phone}\n`;
     const encodedMessage = encodeURIComponent(message);
@@ -560,29 +561,6 @@ function deleteItem(i) {
 
 function closeAdmin() {
     document.getElementById('adminPanel').style.display='none';
-}
-// دالة عرض المنتجات
-function renderProducts() {
-    const container = document.getElementById('productsContainer');
-    container.innerHTML = '';
-    filteredItems.forEach((item) => {
-        const realIndex = items.indexOf(item);
-        const div = document.createElement('div');
-        div.className='product';
-        div.innerHTML = `
-            <img src="${item.image}" alt="${item.name}" style="width:auto; height:98px; border-radius:8px; margin-bottom:15px; margin: 0 auto; 
-            display: block;">
-            <h3>${item.name}</h3>
-            <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
-            <div class="quantity-controls">
-                <button onclick="decreaseQty(${realIndex})">-</button>
-                <input type="text" id="qtyInput${realIndex}" value="1" readonly />
-                <button onclick="increaseQty(${realIndex}, ${item.quantity})">+</button>
-            </div>
-            <a href="#" class="btn" onclick="addToCart(event, ${realIndex})">إضافة إلى السلة</a>
-        `;
-        container.appendChild(div);
-    });
 }
 </script>
 </body>
