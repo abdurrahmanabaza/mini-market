@@ -93,36 +93,32 @@ header h1 {
     width: 90%; /* عرض أكبر مناسب للشاشة */
     max-width: 900px; /* تحديد الحد الأقصى للعرض */
 }
-/* تقليل عرض مربع الكمية */
-.quantity-controls {
-    display: flex;
-    width: 20px;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-}
 /* أزرار +/- */
 .quantity-controls button {
-    padding: 7px 8px; /* تقليل الحجم */
-    font-size: 1em;
-    border: none;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 4px;
-    min-width: 30px; /* عرض ثابت للزر */
-}
+        padding: 5px 10px;
+        font-size: 1em;
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 0 5px;
+        transition: background-color 0.3s;
+    }
 .quantity-controls button:hover {
     background-color: #0056b3;
 }
 /* مربع الكمية */
 #qtyInput {
-    width: 10px; /* تقليل العرض */
-    height: 20px; /* الحفاظ على الارتفاع مناسب */
+    width: 20px;
+    height: 15px;
+    left: 30px;
+    right: 30px;
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 4px;
     margin: 0 5px;
-    font-size: 1em;
+    font-size: 2em;
 }
 
 /* باقي الأنماط كما هي */
@@ -201,10 +197,11 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    width:100%;
     margin-bottom: 10px;
     margin-left: 10px;
     mrargin-right: 10px;
+    left: 30px;
+    right: 30px;
 }
 .btn {
     display: flex;
@@ -360,7 +357,7 @@ const items = [
     { name: "بسكويت شاي", quantity: 31, value: 9900 },
     { name: "سائل جلي نورا ٣٨٠ مل", quantity: 33, value: 12100 },
     { name: "صابون ماتيز", quantity: 29, value: 4000 },
-    { name: "قهوة بن الحموي 200 غ", quantity: 5, value: 13200 }
+    { name: "قهوة بن الحموي ٢٤٠ غ", quantity: 0, value: 13200 }
 ];
 
 let cart = [];
