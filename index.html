@@ -494,9 +494,10 @@ document.querySelector('#confirmOrderBtn').addEventListener('click', () => {
     }
     let message = 'طلب جديد:\n';
     cart.forEach(item => {
-        message += `${item.name} عدد  ${item.quantity}\n`;
+        message += `${item.name} ×  ${item.quantity}\n`;
     });
-    message += `ــــــــــــــــــ\n`
+    message += `ـــــــــــــــــــــــــــــــــــــــــ\n`
+    message += `المجموع النهائي: ${total.toLocaleString()} ل.س \n`
     message += `\nالعنوان: ${address}\n`;
     message += `رقم الهاتف: ${phone}\n`;
     const encodedMessage = encodeURIComponent(message);
