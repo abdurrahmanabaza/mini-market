@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>السوق الإلكتروني</title>
+<!-- إضافة خط من Google Fonts يدعم العربية -->
+<link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet" />
+<link rel="icon" href="images/icon.jpg" />
+
+<!-- مكتبة Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Cairo', Arial, Tahoma, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #eee;
+}
+</style>
+</head>
+<body>
+
+<h1>منتجات السوق</h1>
+<table id="productsTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>الاسم</th>
+            <th>السعر</th>
+            <th>الكمية</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- البيانات ستُملأ هنا -->
+    </tbody>
+</table>
+
+<script>
+  // تهيئة الاتصال بـ Supabase
+  const supabaseUrl = "https://ctwvizwmbrgdwuedjeqo.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3ZpendtYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw";
+
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  // دالة لجلب البيانات من جدول products
+  async function loadProducts() {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+
+    if (error) {
+      console.error('خطأ في جلب البيانات:', error);
+      alert('حدث خطأ أثناء جلب البيانات.');
+      return;
+    }
+
+    const tbody = document.querySelector('#productsTable tbody');
+    tbody.innerHTML = ''; // تفريغ الجدول قبل الملء
+
+    data.forEach(product => {
+      const row = document.createElement('tr');
+
+      const idCell = document.createElement('td');
+      idCell.textContent = product.id;
+      row.appendChild(idCell);
+
+      const nameCell = document.createElement('td');
+      nameCell.textContent = product.name;
+      row.appendChild(nameCell);
+
+      const priceCell = document.createElement('td');
+      priceCell.textContent = product.price;
+      row.appendChild(priceCell);
+
+      const qtyCell = document.createElement('td');
+      qtyCell.textContent = product.qty;
+      row.appendChild(qtyCell);
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // استدعاء الدالة عند تحميل الصفحة
+  window.onload = loadProducts;
+</script>
+
+</body>
+</html>
