@@ -45,7 +45,7 @@ th {
 <body>
 
 <h1>منتجات السوق</h1>
-<table id="productsTable">
+<table id="products">
     <thead>
         <tr>
             <th>ID</th>
@@ -78,26 +78,26 @@ th {
       return;
     }
 
-    const tbody = document.querySelector('#productsTable tbody');
+    const tbody = document.querySelector('#products tbody');
     tbody.innerHTML = ''; // تفريغ الجدول قبل الملء
 
     data.forEach(product => {
       const row = document.createElement('tr');
 
       const idCell = document.createElement('td');
-      idCell.textContent = product.id;
+      idCell.textContent = products.id;
       row.appendChild(idCell);
 
       const nameCell = document.createElement('td');
-      nameCell.textContent = product.name;
+      nameCell.textContent = products.name;
       row.appendChild(nameCell);
 
       const priceCell = document.createElement('td');
-      priceCell.textContent = product.price;
+      priceCell.textContent = products.price;
       row.appendChild(priceCell);
 
       const qtyCell = document.createElement('td');
-      qtyCell.textContent = product.qty;
+      qtyCell.textContent = products.qty;
       row.appendChild(qtyCell);
 
       tbody.appendChild(row);
