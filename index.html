@@ -68,8 +68,8 @@ th {
   // دالة لجلب البيانات من جدول products
   async function loadProducts() {
     const { data, error } = await supabase
-      .from('products')
-      .select('*');
+  .from('localproducts.products')
+  .select('*');
 
     if (error) {
       console.error('خطأ في جلب البيانات:', error);
