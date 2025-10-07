@@ -4,9 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>السوق الإلكتروني</title>
+
+  <!-- خط Cairo من Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet" />
+
+  <!-- أيقونة الموقع -->
   <link rel="icon" href="images/icon.jpg" />
+
+  <!-- مكتبة Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -19,11 +26,16 @@
       margin: auto;
     }
     h1 { text-align: center; margin-bottom: 20px; }
-    .message { text-align: center; padding: 20px 0; color: #666; }
+    .message {
+      text-align: center;
+      padding: 20px 0;
+      color: #666;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      display: none;
+      display: none; /* يظهِر الجدول بعد التحميل */
+      overflow-x: auto;
     }
     th, td {
       border: 1px solid #ccc;
@@ -44,8 +56,8 @@
     .wh-btn:hover { background: #1DA851; }
   </style>
 </head>
-<body>
 
+<body>
   <h1>منتجات السوق</h1>
   <div id="message" class="message">جاري تحميل المنتجات…</div>
 
@@ -64,14 +76,16 @@
 
   <script>
     // إعداد Supabase
-    const supabaseUrl = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl   = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
+    const supabaseKey   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
+    const supabase     = supabase.createClient(supabaseUrl, supabaseKey);
 
     // دالة لعرض المنتجات في الجدول
     function renderProducts(products) {
+      console.log('🖥️ renderProducts with', products);
       const tbody = document.querySelector('#products-table tbody');
       tbody.innerHTML = '';
+
       products.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = 
@@ -92,32 +106,38 @@
         ;
         tbody.appendChild(tr);
       });
+
       document.getElementById('message').style.display = 'none';
       document.getElementById('products-table').style.display = 'table';
     }
 
-    // جلب البيانات من Supabase
+    // جلب البيانات من Supabase مع تتبع الأخطاء
     async function loadProducts() {
+      console.log('▶️ loadProducts() called');
+      document.getElementById('message').textContent = 'جاري تحميل المنتجات…';
+
       try {
         const { data, error } = await supabase
           .from('products')
           .select('id, name, price, qty');
 
+        console.log('✅ Supabase response:', { data, error });
+
         if (error) throw error;
-        if (!data || !data.length) {
+        if (!data || data.length === 0) {
           document.getElementById('message').textContent = 'لا توجد منتجات حالياً.';
           return;
         }
 
         renderProducts(data);
+
       } catch (e) {
-        console.error('خطأ في جلب البيانات من Supabase:', e);
+        console.error('❌ loadProducts error:', e);
         document.getElementById('message').textContent = 'حدث خطأ أثناء تحميل المنتجات.';
       }
     }
 
-    window.onload = loadProducts;
+    window.addEventListener('DOMContentLoaded', loadProducts);
   </script>
-
 </body>
 </html>
