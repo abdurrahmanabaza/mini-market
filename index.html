@@ -322,7 +322,7 @@ let filteredItems = [...items];
 
 async function loadData() {
   try {
-    const res = await fetch('data.json');
+    const res = await fetch('data.json?v=' + Date.now());
     const externalData = await res.json();
     // دمج البيانات من ملف json مع المنتجات الموجودة
     items.forEach(product => {
