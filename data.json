@@ -1,10 +1,11 @@
 [
-  { "id": 1, "name": "سكر فرط", "quantity": 200, "value": 7500 },
-  { "id": 2, "name": "جبنة شركسية", "quantity": 10, "value": 51000 },
+  { "id": 1, "name": "سكر فرط", "quantity": 200, "value": 7000 },
+  { "id": 2, "name": "جبنة شركسية", "quantity": 10, "value": 49000 },
   { "id": 3, "name": "بيض", "quantity": 3, "value": 34000 }
  
 
 ]
+
 
 
 
