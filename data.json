@@ -1,8 +1,9 @@
 [
   { "id": 1, "name": "سكر فرط", "quantity": 200, "value": 7500 },
-  { "id": 2, "name": "ملح", "quantity": 371, "value": 1500 },
+  { "id": 2, "name": "ملح", "quantity": 371, "value": 2000 },
   { "id": 3, "name": "بيض", "quantity": 3, "value": 34000 }
  
 
 ]
+
 
