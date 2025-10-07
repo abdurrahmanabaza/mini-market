@@ -55,7 +55,6 @@
     cursor: pointer;
     color: #555;
     transition: background-color 0.3s, color 0.3s;
-    z-index: 9999;
 }
 #adminFixedBtn:hover {
     background-color: #eee;
@@ -274,6 +273,8 @@ footer {
     <h2 style="text-align:center; margin-bottom: 14px; margin-top: 8px;">منتجاتنا</h2>
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." />
+        <!-- زر تحديث البيانات -->
+        <button style="margin-left:10px; padding:5px 10px; border:none; border-radius:4px; background:#28a745; color:#fff; cursor:pointer;" onclick="loadData()">تحديث البيانات</button>
     </div>
     <div class="products" id="productsContainer"></div>
 </div>
@@ -324,25 +325,29 @@ async function loadData() {
   try {
     const res = await fetch('data.json');
     const externalData = await res.json();
-    // دمج البيانات الخارجية مع المنتجات
-    for (let item of items) {
-      const match = externalData.find(d => d.name === item.name || d.id === item.id);
-      item.quantity = match?.quantity ?? 0;
-      item.value = match?.value ?? 0;
-    }
+    // دمج البيانات من ملف json مع المنتجات الموجودة
+    items.forEach(product => {
+      const data = externalData.find(d => d.id === product.id || d.name === product.name);
+      if (data) {
+        product.value = data.value;
+        product.quantity = data.quantity;
+      } else {
+        // إذا لم توجد بيانات، يمكن إعطاء قيم افتراضية
+        if (product.value === undefined) product.value = 100;
+        if (product.quantity === undefined) product.quantity = 0;
+      }
+    });
     renderProducts();
   } catch (e) {
     console.error("فشل تحميل البيانات:", e);
-    // إذا فشل التحميل، يمكن تعيين قيم افتراضية
-    items.forEach(i => {
-      if (i.quantity === undefined) i.quantity = 0;
-      if (i.value === undefined) i.value = 100;
-    });
+    // في حال فشل التحميل، استمر باستخدام القيم الحالية
     renderProducts();
   }
 }
 
-window.onload = loadData;
+window.onload = () => {
+  loadData();
+}
 
 function renderProducts() {
   const container = document.getElementById('productsContainer');
@@ -527,7 +532,7 @@ function renderAdminProducts() {
 }
 
 function addProduct() {
-  items.push({name:'مادة جديدة', value:1000, quantity:100});
+  items.push({name:'مادة جديدة', value:100, quantity:100});
   renderAdminProducts();
   renderProducts();
 }
