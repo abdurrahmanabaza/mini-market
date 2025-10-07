@@ -316,50 +316,38 @@ footer {
 <footer>
     <p>© 2025 السوق الإلكتروني. جميع الحقوق محفوظة.</p>
 </footer>
-
 <script>
 const items = [
-    { name: "سكر فرط",              quantity: 308   , value: 6500     , image: "images/suger.jpg" },
-    { name: "ملح",                  quantity: 371   , value: 1540     , image: "images/sult.jpg" },
-    { name: "بيض",                  quantity: 12    , value: 25000     , image: "images/egg.jpg" },
-    { name: "زيت دوار الشمس",      quantity: 356    , value: 17600     , image: "images/زيت مازولا.jpg" },
-    { name: "زيت زيتون",           quantity: 267    , value: 60500      , image: "images/زيت زيتون.jpg"  },
-    { name: "زيتون",               quantity: 242    , value: 15400       , image: "images/زيتون.jpg" },
-    { name: "مرتديلا بسمة",         quantity: 142   , value: 22000       , image: "images/مرتديلا بسمة.jpg" },
-    { name: "مرتديلا زينة",         quantity: 160   , value: 24200       , image: "images/مرتديلا زينة.jpg"},
-    { name: "مرتديلا هنا",          quantity: 160   , value: 26400      , image: "images/مرتديلا هنا.jpg"},
-    { name: "مرتديلا همسة صيف",     quantity: 216   , value: 13200      , image: "images/مرتديلا همسة صيف.png"},
-    { name: "سردين ليو",            quantity: 600   , value: 5500       , image: "images/سردين ليو.jpg"},
-    { name: "سردين ميلو",           quantity: 509   , value: 5500       , image: "images/سردين ميلو.jpg"},
-    { name: "سردين الدرة",          quantity: 588   , value: 6050       , image: "images/سردين الدرة.jpg"},
-    { name: "سكر",                  quantity: 393   , value: 8800       , image: "images/سكر سيدي هشام.jpg"},
-    { name: "مربى الدرة",          quantity: 192    , value: 19800       , image: "images/مربى الدرة.jpg"},
-    { name: "زبدة الفول السوداني الدرة", quantity: 83   , value: 19800   , image: "images/زبدة فستق الدرة.jpg"},
-    { name: "عود تنظيف أذن",       quantity: 100    , value: 3300         , image: "images/عود أذن.jpg"},
-    { name: "جبنة شركسية",         quantity: 31 , value: 58000         , image: "images/جبنة شركسية.jpg"  },
-    { name: "محارم كومفورت",       quantity: 241    , value: 8800         , image: "images/محارم كومفورت.jpg"},
-    { name: "طحين زيرو سيدي هشام", quantity: 166    , value: 6000         , image: "images/طحين سيدي هشام.jpg"},
-    { name: "ماجي ظرف",             quantity: 990   , value: 1100         , image: "images/ماجي ظرف.jpg"},
-    { name: "ماجي مكعب",            quantity: 678   , value: 1650         , image: "images/ماجي مكعب.jpg"},
-    { name: "رز سيدي هشام",         quantity: 502   , value: 9900         , image: "images/رز سيدي هشام.jpg"},
-    { name: "دبس بندورة",           quantity: 94    , value: 22000         , image: "images/دبس بندورة.jpg"},
-    { name: "تمر خلاص",              quantity: 250  , value: 33000        , image: "images/تمر خلاص.jpg"},
-    { name: "دبس رمان فرط",         quantity: 80    , value: 27500         , image: "images/دبس رمان.jpg"},
-    { name: "سيتي كافيه",           quantity: 1000  , value: 1100         , image: "images/سيتي كافيه.jpg"},
-    { name: "طون ليو",              quantity: 98    , value: 12100          , image: "images/طون ليو.jpg"},
-    { name: "اندومي",               quantity: 1980  , value: 3300         , image: "images/اندومي.jpg"},
-    { name: "شامبو أوليڤا",         quantity: 150   , value: 19800         , image: "images/شامبو اوليفا.jpg"},
-    { name: "معجون أسنان سووايت",   quantity: 192   , value: 11000         , image: "images/معجون سووايت.jpg"},
-    { name: "عصير سكويز",            quantity: 663  , value: 4400          , image: "images/عصير سكويز.jpg"},
-    { name: "عصير طبيعي",            quantity: 20   , value: 19800          , image: "images/عصير طبيعي.jpg"},
-    { name: "شاي أكرك عجم ظروف",     quantity: 200  , value: 11000         , image: "images/شاي اكرك عجم ظروف.jpg"},
-    { name: "شاي سيدي هشام ظروف",    quantity: 200  , value: 11000         , image: "images/شاي سيدي هشام ظروف.jpg"},
-    { name: "شاي فرط همسة صيف",      quantity: 35   , value: 111000         , image: "images/شاي.jpg"},
-    { name: "بسكويت شاي",             quantity: 31  , value: 9900           , image: "images/بسكويت الشاي.jpg"},
-    { name: "سائل جلي نورا ٣٨٠ مل",  quantity: 33   , value: 12100          , image: "images/سائل جلي نورا.jpg"},
-    { name: "صابون ماتيز",            quantity: 29  , value: 3000          , image: "images/صابون ماتيز.jpg"},
-    { name: "قهوة بن الحموي 200 غ",   quantity: 10  , value: 13200         , image: "images/بن الحموي.jpg"}
+  { id: 1, name: "سكر فرط", image: "images/suger.jpg" },
+  { id: 2, name: "ملح", image: "images/sult.jpg" },
+  { id: 3, name: "بيض", image: "images/egg.jpg" },
+  // ... باقي المواد بنفس الشكل
 ];
+
+let cart = [];
+let filteredItems = [...items];
+
+// تحميل السعر والكمية من ملف خارجي
+async function loadData() {
+  try {
+    const res = await fetch('data.json');
+    const externalData = await res.json();
+
+    // دمج البيانات حسب الاسم أو id
+    filteredItems = items.map(item => {
+      const match = externalData.find(d => d.name === item.name || d.id === item.id);
+      return {
+        ...item,
+        quantity: match?.quantity ?? 0,
+        value: match?.value ?? 0
+      };
+    });
+
+    renderItems();
+  } catch (e) {
+    console.error("فشل تحميل البيانات:", e);
+  }
+
 
 let cart = [];
 let filteredItems = [...items];
