@@ -570,5 +570,25 @@ function closeAdmin() {
   document.getElementById('adminPanel').style.display='none';
 }
 </script>
+  <script>
+  db.ref("products").once("value").then(snapshot => {
+    const products = Object.values(snapshot.val());
+
+    // مثال: عرض المنتجات في صفحة HTML
+    const container = document.getElementById("products");
+    container.innerHTML = "";
+
+    products.forEach(item => {
+      container.innerHTML += 
+        <div class="product">
+          <img src="${item.image}" alt="${item.name}" />
+          <h3>${item.name}</h3>
+          <p>السعر: ${item.value} ل.س</p>
+          <p>الكمية: ${item.quantity}</p>
+        </div>
+      ;
+    });
+  });
+</script>
 </body>
 </html>
