@@ -11,7 +11,7 @@
   <!-- أيقونة الموقع -->
   <link rel="icon" href="images/icon.jpg" />
 
-  <!-- مكتبة Supabase من CDN بديل -->
+  <!-- مكتبة Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0/dist/umd/supabase.min.js"></script>
   
   <style>
@@ -25,7 +25,7 @@
       max-width: 800px;
       margin: auto;
     }
-    h1 { text-align: center; margin-bottom: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; color: #2c3e50; }
     .message {
       text-align: center;
       padding: 20px 0;
@@ -37,14 +37,24 @@
       display: none;
       overflow-x: auto;
       margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 12px;
       text-align: center;
       font-size: 15px;
     }
-    th { background-color: #f0f0f0; }
+    th { 
+      background-color: #34495e; 
+      color: white;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
     .wh-btn {
       background: #25D366;
       color: #fff;
@@ -56,7 +66,10 @@
       font-family: 'Cairo', sans-serif;
       transition: background 0.3s;
     }
-    .wh-btn:hover { background: #1DA851; }
+    .wh-btn:hover { 
+      background: #1DA851; 
+      transform: translateY(-1px);
+    }
     .error {
       color: #d32f2f;
       text-align: center;
@@ -64,68 +77,97 @@
       background: #ffebee;
       border-radius: 6px;
       margin: 10px 0;
+      border: 1px solid #f44336;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
     }
   </style>
 </head>
 
 <body>
-  <h1>منتجات السوق</h1>
-  <div id="message" class="message">جاري تحميل المنتجات…</div>
+  <h1>🏪 منتجات السوق الإلكتروني</h1>
+  <div id="message" class="message">⏳ جاري تحميل المنتجات…</div>
   <div id="error" class="error" style="display: none;"></div>
 
   <table id="products-table">
     <thead>
       <tr>
-        <th>ID</th>
+        <th>#</th>
         <th>الاسم</th>
         <th>السعر (ل.س)</th>
         <th>الكمية</th>
-        <th>طلب واتساب</th>
+        <th>الطلب</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
   <script>
-    // إعداد Supabase
-    const supabaseUrl = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
-    
-    // التحقق من تحميل المكتبة
-    if (typeof supabase === 'undefined') {
-      document.getElementById('message').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('error').textContent = 'خطأ في تحميل المكتبات. يرجى تحديث الصفحة.';
-    } else {
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-      initApp();
+    // انتظار تحميل المكتبة
+    function waitForSupabase() {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const checkSupabase = () => {
+          attempts++;
+          if (window.supabase && window.supabase.createClient) {
+            resolve(window.supabase);
+          } else if (attempts < 10) {
+            setTimeout(checkSupabase, 500);
+          } else {
+            reject(new Error('تعذر تحميل مكتبة Supabase'));
+          }
+        };
+        checkSupabase();
+      });
     }
 
-    async function initApp() {
+    // إعداد التطبيق
+    async function initializeApp() {
       try {
-        await loadProducts();
+        console.log('🚀 بدء تحميل التطبيق...');
+        
+        // انتظار تحميل Supabase
+        const supabaseLib = await waitForSupabase();
+        console.log('✅ مكتبة Supabase محملة بنجاح');
+        
+        // إعداد العميل
+        const supabaseUrl = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
+        
+        const supabaseClient = supabaseLib.createClient(supabaseUrl, supabaseKey);
+        
+        // تحميل المنتجات
+        await loadProducts(supabaseClient);
+        
       } catch (error) {
-        console.error('خطأ في التطبيق:', error);
-        showError('حدث خطأ في تحميل التطبيق');
+        console.error('❌ خطأ في التطبيق:', error);
+        showError('حدث خطأ: ' + error.message);
       }
     }
-
-    // دالة لعرض المنتجات في الجدول
+    // دالة لعرض المنتجات
     function renderProducts(products) {
-      console.log('🖥 renderProducts with', products);
+      console.log('📋 عرض المنتجات:', products);
       const tbody = document.querySelector('#products-table tbody');
       tbody.innerHTML = '';
 
-      products.forEach(p => {
+      if (products.length === 0) {
+        document.getElementById('message').textContent = 'لا توجد منتجات متاحة حالياً.';
+        return;
+      }
+
+      products.forEach(product => {
         const tr = document.createElement('tr');
         tr.innerHTML = 
-          <td>${p.id}</td>
-          <td>${p.name}</td>
-          <td>${p.price.toLocaleString()}</td>
-          <td>${p.qty}</td>
+          <td>${product.id}</td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${formatPrice(product.price)}</td>
+          <td>${product.qty}</td>
           <td>
-            <button class="wh-btn" onclick="openWhatsApp('${p.name.replace(/'/g, "\\'")}')">
-              واتساب
+            <button class="wh-btn" onclick="openWhatsApp('${escapeHtml(product.name)}')">
+              📱 واتساب
             </button>
           </td>
         ;
@@ -135,55 +177,63 @@
       document.getElementById('message').style.display = 'none';
       document.getElementById('products-table').style.display = 'table';
     }
+
     // دالة لفتح واتساب
     function openWhatsApp(productName) {
-      const message = مرحبا، أود طلب منتج: ${productName};
+      const message = مرحبا، أود طلب المنتج التالي:\n\nالمنتج: ${productName}\n\nشكراً لكم!;
       const url = https://wa.me/963936421060?text=${encodeURIComponent(message)};
       window.open(url, '_blank');
     }
 
-    // جلب البيانات من Supabase مع تتبع الأخطاء
-    async function loadProducts() {
-      console.log('▶️ loadProducts() called');
-      document.getElementById('message').textContent = 'جاري تحميل المنتجات…';
+    // دالة لجلب المنتجات
+    async function loadProducts(supabaseClient) {
+      console.log('🔄 جاري جلب المنتجات...');
+      document.getElementById('message').textContent = '🔄 جاري تحميل المنتجات…';
 
       try {
-        // اختبار الاتصال أولاً
         const { data, error } = await supabaseClient
           .from('products')
           .select('id, name, price, qty')
           .order('id', { ascending: true });
 
-        console.log('✅ Supabase response:', { data, error });
-
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
-          document.getElementById('message').textContent = 'لا توجد منتجات حالياً.';
-          return;
+        if (error) {
+          throw new Error(خطأ في قاعدة البيانات: ${error.message});
         }
 
-        renderProducts(data);
+        console.log('✅ البيانات المستلمة:', data);
+        renderProducts(data || []);
 
       } catch (error) {
-        console.error('❌ loadProducts error:', error);
-        showError('حدث خطأ أثناء تحميل المنتجات: ' + error.message);
+        console.error('❌ خطأ في تحميل المنتجات:', error);
+        showError('تعذر تحميل المنتجات: ' + error.message);
       }
     }
 
+    // دالة لعرض الأخطاء
     function showError(message) {
       document.getElementById('message').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('error').textContent = message;
+      const errorDiv = document.getElementById('error');
+      errorDiv.style.display = 'block';
+      errorDiv.innerHTML = ❌ ${message};
     }
 
-    // بديل إذا فشل تحميل المكتبة
-    if (typeof supabase === 'undefined') {
-      setTimeout(() => {
-        if (typeof supabase === 'undefined') {
-          showError('تعذر تحميل المكتبات المطلوبة. يرجى التحقق من اتصال الإنترنت وتحديث الصفحة.');
-        }
-      }, 3000);
+    // دالة لتنسيق السعر
+    function formatPrice(price) {
+      return new Intl.NumberFormat('ar-SY').format(price);
+    }
+
+    // دالة للهروب من الأحرف الخاصة في HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // بدء التطبيق عندما تكون الصفحة جاهزة
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
     }
   </script>
 </body>
