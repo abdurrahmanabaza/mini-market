@@ -7,6 +7,30 @@
 <!-- إضافة خط من Google Fonts يدعم العربية -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet" />
 <link rel="icon" href="images/icon.jpg">
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
+    authDomain: "local-products-82f7d.firebaseapp.com",
+    databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
+    projectId: "local-products-82f7d",
+    storageBucket: "local-products-82f7d.firebasestorage.app",
+    messagingSenderId: "92892216531",
+    appId: "1:92892216531:web:731bf47474407b77f2e826"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 <style>
   /* التنسيقات الأساسية */
   * {
