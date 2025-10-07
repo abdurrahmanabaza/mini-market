@@ -11,8 +11,9 @@
   <!-- أيقونة الموقع -->
   <link rel="icon" href="images/icon.jpg" />
 
-  <!-- مكتبة Supabase -->
- <script src="https://unpkg.com/@supabase/supabase-js@2.29.0/dist/umd/supabase.min.js"></script>
+  <!-- مكتبة Supabase من CDN بديل -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0/dist/umd/supabase.min.js"></script>
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -33,32 +34,44 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      display: none; /* يظهِر الجدول بعد التحميل */
+      display: none;
       overflow-x: auto;
+      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 12px;
       text-align: center;
       font-size: 15px;
     }
-    th { background-color: #eee; }
+    th { background-color: #f0f0f0; }
     .wh-btn {
       background: #25D366;
       color: #fff;
       border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 8px 15px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      font-family: 'Cairo', sans-serif;
+      transition: background 0.3s;
     }
     .wh-btn:hover { background: #1DA851; }
+    .error {
+      color: #d32f2f;
+      text-align: center;
+      padding: 15px;
+      background: #ffebee;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
   </style>
 </head>
 
 <body>
   <h1>منتجات السوق</h1>
   <div id="message" class="message">جاري تحميل المنتجات…</div>
+  <div id="error" class="error" style="display: none;"></div>
 
   <table id="products-table">
     <thead>
@@ -75,13 +88,31 @@
 
   <script>
     // إعداد Supabase
-    const supabaseUrl   = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
-    const supabaseKey   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
-    const supabase     = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = 'https://ctwvizwmbrgdwuedjeqo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0d3Zpd3ptYnJnZHd1ZWRqZXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3ODM4NjYsImV4cCI6MjA3NTM1OTg2Nn0.jDXeV10iR1u1_jv05TJnRZXhlEKZz8C58MfuVjFFJrw';
+    
+    // التحقق من تحميل المكتبة
+    if (typeof supabase === 'undefined') {
+      document.getElementById('message').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error').textContent = 'خطأ في تحميل المكتبات. يرجى تحديث الصفحة.';
+    } else {
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+      initApp();
+    }
+
+    async function initApp() {
+      try {
+        await loadProducts();
+      } catch (error) {
+        console.error('خطأ في التطبيق:', error);
+        showError('حدث خطأ في تحميل التطبيق');
+      }
+    }
 
     // دالة لعرض المنتجات في الجدول
     function renderProducts(products) {
-      console.log('🖥️ renderProducts with', products);
+      console.log('🖥 renderProducts with', products);
       const tbody = document.querySelector('#products-table tbody');
       tbody.innerHTML = '';
 
@@ -90,15 +121,10 @@
         tr.innerHTML = 
           <td>${p.id}</td>
           <td>${p.name}</td>
-          <td>${p.price}</td>
+          <td>${p.price.toLocaleString()}</td>
           <td>${p.qty}</td>
           <td>
-            <button class="wh-btn"
-              onclick="window.open(
-                'https://wa.me/963936421060?text=' +
-                encodeURIComponent('مرحبا، أود طلب منتج: ${p.name}'),
-                '_blank'
-              )">
+            <button class="wh-btn" onclick="openWhatsApp('${p.name.replace(/'/g, "\\'")}')">
               واتساب
             </button>
           </td>
@@ -109,6 +135,12 @@
       document.getElementById('message').style.display = 'none';
       document.getElementById('products-table').style.display = 'table';
     }
+    // دالة لفتح واتساب
+    function openWhatsApp(productName) {
+      const message = مرحبا، أود طلب منتج: ${productName};
+      const url = https://wa.me/963936421060?text=${encodeURIComponent(message)};
+      window.open(url, '_blank');
+    }
 
     // جلب البيانات من Supabase مع تتبع الأخطاء
     async function loadProducts() {
@@ -116,13 +148,16 @@
       document.getElementById('message').textContent = 'جاري تحميل المنتجات…';
 
       try {
-        const { data, error } = await supabase
+        // اختبار الاتصال أولاً
+        const { data, error } = await supabaseClient
           .from('products')
-          .select('id, name, price, qty');
+          .select('id, name, price, qty')
+          .order('id', { ascending: true });
 
         console.log('✅ Supabase response:', { data, error });
 
         if (error) throw error;
+        
         if (!data || data.length === 0) {
           document.getElementById('message').textContent = 'لا توجد منتجات حالياً.';
           return;
@@ -130,13 +165,26 @@
 
         renderProducts(data);
 
-      } catch (e) {
-        console.error('❌ loadProducts error:', e);
-        document.getElementById('message').textContent = 'حدث خطأ أثناء تحميل المنتجات.';
+      } catch (error) {
+        console.error('❌ loadProducts error:', error);
+        showError('حدث خطأ أثناء تحميل المنتجات: ' + error.message);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', loadProducts);
+    function showError(message) {
+      document.getElementById('message').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error').textContent = message;
+    }
+
+    // بديل إذا فشل تحميل المكتبة
+    if (typeof supabase === 'undefined') {
+      setTimeout(() => {
+        if (typeof supabase === 'undefined') {
+          showError('تعذر تحميل المكتبات المطلوبة. يرجى التحقق من اتصال الإنترنت وتحديث الصفحة.');
+        }
+      }, 3000);
+    }
   </script>
 </body>
 </html>
