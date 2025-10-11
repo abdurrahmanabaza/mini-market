@@ -12,7 +12,6 @@
     #searchInput { width: 90%; max-width: 480px; padding: 8px 12px; border-radius: 6px; border:1px solid #ccc; }
     .products { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:10px; }
     .product { width:220px; background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 10px rgba(0,0,0,0.06); text-align:center; }
-    .product img { width:100%; height:110px; object-fit:cover; border-radius:8px; margin-bottom:8px; }
     .product h3 { margin:6px 0; font-size:16px; }
     .product .price { color:#2a7a2a; font-weight:700; margin-bottom:8px; }
     .quantity-controls { display:flex; gap:6px; justify-content:center; align-items:center; margin-bottom:8px; }
@@ -89,9 +88,8 @@ function renderProducts() {
   const container = document.getElementById("productsContainer");
   container.innerHTML = "";
   filteredItems.forEach((item, index) => {
-    container.innerHTML += `
+    container.innerHTML += 
       <div class="product">
-        <img src="${item.image || 'images/default.jpg'}" alt="${item.name}" />
         <h3>${item.name}</h3>
         <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
         <div class="quantity-controls">
@@ -104,8 +102,7 @@ function renderProducts() {
     ;
   });
 }
-
-function increaseQty(index, max) {
+  function increaseQty(index, max) {
   const input = document.getElementById(qtyInput${index});
   let val = parseInt(input.value);
   if (val < max) input.value = val + 1;
@@ -148,7 +145,7 @@ function renderCart() {
       <li>${item.name} × ${item.qty} <span>${(item.value * item.qty).toLocaleString()} ل.س</span></li>
     ;
   });
-  document.getElementById("totalPrice").innerText = المجموع النهائي: ${total.toLocaleString()} ل.س`;
+  document.getElementById("totalPrice").innerText = المجموع النهائي: ${total.toLocaleString()} ل.س;
 }
 
 function confirmOrder() {
