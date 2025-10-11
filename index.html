@@ -20,8 +20,6 @@
     .btn { display:inline-block; padding:8px 10px; background:#007bff; color:#fff; border-radius:6px; text-decoration:none; cursor:pointer; }
     footer { text-align:center; margin-top:28px; color:#666; }
     #cartItems li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee; }
-    #adminPanel { display:none; position:fixed; top:50px; right:10px; background:#fff; padding:20px; border-radius:8px; max-height:85%; overflow:auto; z-index:9999; width:360px; box-shadow:0 10px 30px rgba(0,0,0,0.15); }
-    input[type="text"], input[type="number"] { padding:8px; width:100%; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; margin-bottom:8px; }
   </style>
 </head>
 <body>
@@ -51,13 +49,6 @@
   <button onclick="confirmOrder()">تأكيد الطلب</button>
 </div>
 
-<div id="adminPanel">
-  <h3>إدارة المنتجات</h3>
-  <div id="adminProducts"></div>
-  <button onclick="addProduct()">إضافة مادة جديدة</button>
-  <button onclick="closeAdmin()">إغلاق</button>
-</div>
-
 <footer>
   <p>© 2025 السوق الإلكتروني. جميع الحقوق محفوظة.</p>
 </footer>
@@ -72,11 +63,11 @@ const firebaseConfig = {
   authDomain: "local-products-82f7d.firebaseapp.com",
   databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
   projectId: "local-products-82f7d",
-  storageBucket: "local-products-82f7d.firebasestorage.app",
+  storageBucket: "local-products-82f7d.appspot.com",
   messagingSenderId: "92892216531",
   appId: "1:92892216531:web:b39013834c0215eaf2e826"
 };
-  
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -93,13 +84,14 @@ function loadProducts() {
     renderProducts();
   });
 }
-    function renderProducts() {
+
+function renderProducts() {
   const container = document.getElementById("productsContainer");
   container.innerHTML = "";
   filteredItems.forEach((item, index) => {
-    container.innerHTML += 
+    container.innerHTML += `
       <div class="product">
-        <img src="${item.image}" alt="${item.name}" />
+        <img src="${item.image || 'images/default.jpg'}" alt="${item.name}" />
         <h3>${item.name}</h3>
         <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
         <div class="quantity-controls">
@@ -152,9 +144,11 @@ function renderCart() {
   let total = 0;
   cart.forEach((item, i) => {
     total += item.value * item.qty;
-    container.innerHTML += <li>${item.name} × ${item.qty} <span>${(item.value * item.qty).toLocaleString()} ل.س</span></li>;
+    container.innerHTML += 
+      <li>${item.name} × ${item.qty} <span>${(item.value * item.qty).toLocaleString()} ل.س</span></li>
+    ;
   });
-  document.getElementById("totalPrice").innerText = المجموع النهائي: ${total.toLocaleString()} ل.س;
+  document.getElementById("totalPrice").innerText = المجموع النهائي: ${total.toLocaleString()} ل.س`;
 }
 
 function confirmOrder() {
@@ -167,8 +161,6 @@ function confirmOrder() {
 }
 
 document.getElementById("searchInput").addEventListener("input", () => {
-  const q = document.getElementById("searchInput").value
-    document.getElementById("searchInput").addEventListener("input", () => {
   const q = document.getElementById("searchInput").value.trim().toLowerCase();
   if (q === "") {
     filteredItems = [...items];
@@ -177,6 +169,9 @@ document.getElementById("searchInput").addEventListener("input", () => {
   }
   renderProducts();
 });
+
+// تحميل المنتجات عند بداية الصفحة
+loadProducts();
 </script>
 </body>
 </html>
