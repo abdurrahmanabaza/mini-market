@@ -110,8 +110,7 @@
     // تحميل البيانات من المسار products
     function loadProducts() {
       productsEl.innerHTML = 'جارٍ التحميل...';
-      db.ref('products').once('value')
-        .then(function(snap) {
+      db.ref('products').on("value",function(snap) {
           const data = snap.val();
           if (!data) {
             productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
