@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <title>إتمام الطلب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      background: #f5f7fb;
+      padding: 20px;
+      color: #0b1726;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d7dbe6;
+      font-size: 16px;
+    }
+    button {
+      background: #0f62fe;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .cart-summary {
+      margin-top: 20px;
+      background: #eef2ff;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .cart-summary ul {
+      padding: 0;
+      list-style: none;
+    }
+    .cart-summary li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>إتمام الطلب</h2>
+    <form id="userDataForm">
+      <input type="text" id="userName" placeholder="الاسم الكامل" required />
+      <input type="text" id="userAddress" placeholder="العنوان" required />
+      <input type="tel" id="userPhone" placeholder="رقم الهاتف" required />
+      <button type="submit">إرسال الطلب</button>
+    </form>
+
+    <div class="cart-summary" id="cartSummary" style="display:none">
+      <h3>محتوى السلة</h3>
+      <ul id="cartItems"></ul>
+      <div><strong>الإجمالي:</strong> <span id="cartTotal">0</span> ل.س</div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // إعدادات Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
+      authDomain: "local-products-82f7d.firebaseapp.com",
+      databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
+      projectId: "local-products-82f7d",
+      storageBucket: "local-products-82f7d.appspot.com",
+      messagingSenderId: "92892216531",
+      appId: "1:92892216531:web:b39013834c0215eaf2e826"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // تعبئة النموذج تلقائيًا من LocalStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('userData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('userName').value = data.name || '';
+        document.getElementById('userAddress').value = data.address || '';
+        document.getElementById('userPhone').value = data.phone || '';
+      }
+
+      // عرض السلة إذا كانت محفوظة
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (cart.length) {
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        let total = 0;
+        cart.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = ${item.name} × ${item.qty} = ${item.price * item.qty} ل.س;
+          cartItems.appendChild(li);
+          total += item.price * item.qty;
+        });
+        cartTotal.textContent = total.toLocaleString();
+        document.getElementById('cartSummary').style.display = 'block';
+      }
+    });
+
+    // إرسال الطلب وتخزين البيانات
+    document.getElementById('userDataForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('userName').value.trim();
+const address = document.getElementById('userAddress').value.trim();
+      const phone = document.getElementById('userPhone').value.trim();
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+      const newOrder = {
+        name, address, phone,
+        cart,
+        total,
+        timestamp: Date.now()
+      };
+
+      // حفظ البيانات في LocalStorage
+      localStorage.setItem('userData', JSON.stringify({ name, address, phone }));
+
+      // إرسال إلى Firebase
+      db.ref('userOrders').push(newOrder)
+        .then(() => {
+          alert('تم إرسال الطلب بنجاح!');
+          localStorage.removeItem('cart');
+          window.location.href = 'index.html'; // العودة للصفحة الرئيسية
+        })
+        .catch(err => {
+          alert('حدث خطأ أثناء الإرسال: ' + err.message);
+        });
+    });
+  </script>
+</body>
+</html>
