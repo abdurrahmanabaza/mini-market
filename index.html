@@ -184,7 +184,9 @@
     });
 
     function addToCart(id) {
+       console.log('إضافة المنتج بالـ id:', id);
       var p = products.find(function(x) { return x.id === id; });
+      console.log('المنتج:', p);
       if (!p) { alert('المنتج غير موجود'); return; }
       if (p.quantity <= 0) { alert('الكمية غير متاحة'); return; }
       var existing = cart.find(function(c) { return c.id === id; });
