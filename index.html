@@ -96,24 +96,27 @@
     function loadProducts() {
       productsEl.innerHTML = 'جارٍ التحميل...';
       db.ref('products').once('value')
-        .then(snap => {
+        .then(function(snap) {
           const data = snap.val();
           if (!data) {
             productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
             countEl.innerText = '0';
             return;
           }
-          // تحويل المفاتيح إلى id (يحمي من اختلاف مفاتيح رقمية أو نصية)
-          products = Object.entries(data).map(([key, val]) => ({
-            id: key,
-            name: val.name || '',
-            quantity: Number(val.quantity || 0),
-            price: Number(val.price ?? val.value ?? 0)
-          }));
-          filtered = [...products];
+          products = Object.entries(data).map(function(entry) {
+            var key = entry[0];
+            var val = entry[1] || {};
+            return {
+              id: key,
+              name: val.name || '',
+              quantity: Number(val.quantity || 0),
+              price: Number(val.price !== undefined ? val.price : (val.value !== undefined ? val.value : 0))
+            };
+          });
+          filtered = products.slice();
           renderProducts();
         })
-        .catch(err => {
+        .catch(function(err) {
           productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
           logEl.innerText = 'تفاصيل الخطأ: ' + (err.message || err);
           console.error(err);
@@ -129,41 +132,43 @@
         return;
       }
       countEl.innerText = String(filtered.length);
-      filtered.forEach(p => {
-        const card = document.createElement('div');
+      filtered.forEach(function(p) {
+        var card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = 
-          <div class="title">${escapeHtml(p.name)}</div>
-          <div class="meta"><div>السعر: <strong>${p.price.toLocaleString()}</strong> ل.س</div><div>الكمية: <span>${p.quantity}</span></div></div>
-          <div class="actions">
-            <button class="btn-sec" data-action="details" data-id="${p.id}">تفاصيل</button>
-            <button class="btn-primary" data-action="add" data-id="${p.id}">أضف للسلة</button>
-          </div>
-        ;
+        var nameSafe = escapeHtml(p.name);
+        var priceStr = Number(p.price).toLocaleString();
+        var qtyStr = String(Number(p.quantity));
+        card.innerHTML = ''
+          + '<div class="title">' + nameSafe + '</div>'
+          + '<div class="meta"><div>السعر: <strong>' + priceStr + '</strong> ل.س</div><div>الكمية: <span>' + qtyStr + '</span></div></div>'
+          + '<div class="actions">'
+          + '<button class="btn-sec" data-action="details" data-id="' + p.id + '">تفاصيل</button>'
+          + '<button class="btn-primary" data-action="add" data-id="' + p.id + '">أضف للسلة</button>'
+          + '</div>';
         productsEl.appendChild(card);
       });
     }
 
     // حماية HTML بسيطة
-    function escapeHtml(text){
-      return String(text || '').replace(/[&<>"'=\/]/g, function(s){ return '&#'+s.charCodeAt(0)+';'; });
+    function escapeHtml(text) {
+      return String(text || '').replace(/[&<>"'`=\/]/g, function(s) { return '&#' + s.charCodeAt(0) + ';'; });
     }
 
     // تفويض الأحداث (يوفر تجنب مشاكل scope مع inline onclick)
-    productsEl.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
+    productsEl.addEventListener('click', function(e) {
+      var btn = e.target.closest('button');
       if (!btn) return;
-      const action = btn.dataset.action;
-      const id = btn.dataset.id;
+      var action = btn.getAttribute('data-action');
+      var id = btn.getAttribute('data-id');
       if (action === 'add') addToCart(id);
       if (action === 'details') showDetails(id);
     });
 
     function addToCart(id) {
-      const p = products.find(x => x.id === id);
+      var p = products.find(function(x) { return x.id === id; });
       if (!p) { alert('المنتج غير موجود'); return; }
       if (p.quantity <= 0) { alert('الكمية غير متاحة'); return; }
-      const existing = cart.find(c => c.id === id);
+      var existing = cart.find(function(c) { return c.id === id; });
       if (existing) {
         if (existing.qty + 1 > p.quantity) { alert('تجاوزت الكمية المتاحة'); return; }
         existing.qty++;
@@ -174,22 +179,22 @@
     }
 
     function showDetails(id) {
-      const p = products.find(x => x.id === id);
+      var p = products.find(function(x) { return x.id === id; });
       if (!p) return alert('تفاصيل غير متاحة');
-      alert(${p.name}\nالسعر: ${p.price.toLocaleString()} ل.س\nالكمية المتاحة: ${p.quantity});
+      alert(p.name + '\nالسعر: ' + Number(p.price).toLocaleString() + ' ل.س\nالكمية المتاحة: ' + Number(p.quantity));
     }
 
     function updateCartUI() {
-      cartBtn.innerText = السلة (${cart.reduce((s, i) => s + i.qty, 0)})`;
+      var totalItems = cart.reduce(function(s, i) { return s + i.qty; }, 0);
+      cartBtn.innerText = 'السلة (' + totalItems + ')';
       renderCart();
     }
 
-    cartBtn.addEventListener('click', () => {
+    cartBtn.addEventListener('click', function() {
       cartPanel.style.display = cartPanel.style.display === 'none' ? 'block' : 'none';
       renderCart();
-      cartPanel.scrollIntoView({behavior:'smooth'});
+      cartPanel.scrollIntoView({ behavior: 'smooth' });
     });
-
     function renderCart() {
       cartList.innerHTML = '';
       if (!cart.length) {
@@ -197,45 +202,44 @@
         cartTotal.innerText = '0';
         return;
       }
-      let total = 0;
-      cart.forEach(item => {
+      var total = 0;
+      cart.forEach(function(item) {
         total += item.price * item.qty;
-        const li = document.createElement('li');
+        var li = document.createElement('li');
         li.style.display = 'flex';
         li.style.justifyContent = 'space-between';
         li.style.alignItems = 'center';
         li.style.padding = '6px 0';
-        li.innerHTML = 
-          <div>${escapeHtml(item.name)}</div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button data-id="${item.id}" data-op="minus" class="btn-sec">-</button>
-            <div>${item.qty}</div>
-            <button data-id="${item.id}" data-op="plus" class="btn-primary">+</button>
-            <div style="min-width:100px;text-align:right">${(item.price * item.qty).toLocaleString()} ل.س</div>
-            <button data-id="${item.id}" data-op="remove" class="btn-sec">حذف</button>
-          </div>
-        ;
+        li.innerHTML = ''
+          + '<div>' + escapeHtml(item.name) + '</div>'
+          + '<div style="display:flex;gap:8px;align-items:center">'
+          + '<button data-id="' + item.id + '" data-op="minus" class="btn-sec">-</button>'
+          + '<div>' + item.qty + '</div>'
+          + '<button data-id="' + item.id + '" data-op="plus" class="btn-primary">+</button>'
+          + '<div style="min-width:100px;text-align:right">' + (Number(item.price * item.qty)).toLocaleString() + ' ل.س</div>'
+          + '<button data-id="' + item.id + '" data-op="remove" class="btn-sec">حذف</button>'
+          + '</div>';
         cartList.appendChild(li);
       });
       cartTotal.innerText = total.toLocaleString();
     }
 
     // تفويض أحداث عناصر السلة
-    cartList.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
+    cartList.addEventListener('click', function(e) {
+      var btn = e.target.closest('button');
       if (!btn) return;
-      const id = btn.dataset.id;
-      const op = btn.dataset.op;
+      var id = btn.getAttribute('data-id');
+      var op = btn.getAttribute('data-op');
       if (op === 'plus') changeQty(id, 1);
       if (op === 'minus') changeQty(id, -1);
       if (op === 'remove') removeFromCart(id);
     });
 
     function changeQty(id, delta) {
-      const it = cart.find(c => c.id === id);
+      var it = cart.find(function(c) { return c.id === id; });
       if (!it) return;
-      const prod = products.find(p => p.id === id);
-      const newQty = it.qty + delta;
+      var prod = products.find(function(p) { return p.id === id; });
+      var newQty = it.qty + delta;
       if (newQty <= 0) return;
       if (newQty > (prod ? prod.quantity : it.max)) { alert('تجاوزت الكمية المتاحة'); return; }
       it.qty = newQty;
@@ -243,27 +247,27 @@
     }
 
     function removeFromCart(id) {
-      cart = cart.filter(c => c.id !== id);
+      cart = cart.filter(function(c) { return c.id !== id; });
       updateCartUI();
     }
 
-    clearCart.addEventListener('click', () => {
+    clearCart.addEventListener('click', function() {
       if (!cart.length) return;
       if (confirm('هل تريد تفريغ السلة؟')) { cart = []; updateCartUI(); }
     });
 
-    checkout.addEventListener('click', () => {
+    checkout.addEventListener('click', function() {
       if (!cart.length) return alert('السلة فارغة');
-      const order = { items: cart.map(i => ({id:i.id,name:i.name,price:i.price,qty:i.qty})), createdAt: Date.now() };
+      var order = { items: cart.map(function(i) { return { id: i.id, name: i.name, price: i.price, qty: i.qty }; }), createdAt: Date.now() };
       db.ref('orders').push(order)
-        .then(()=> { alert('تم تسجيل الطلب'); cart=[]; updateCartUI(); })
-        .catch(err=> { console.error(err); alert('فشل إرسال الطلب'); });
+        .then(function() { alert('تم تسجيل الطلب'); cart = []; updateCartUI(); })
+        .catch(function(err) { console.error(err); alert('فشل إرسال الطلب'); });
     });
 
     // بحث مباشر
-    searchEl.addEventListener('input', () => {
-      const q = searchEl.value.trim().toLowerCase();
-      filtered = products.filter(p => p.name.toLowerCase().includes(q));
+    searchEl.addEventListener('input', function() {
+      var q = searchEl.value.trim().toLowerCase();
+      filtered = products.filter(function(p) { return p.name.toLowerCase().includes(q); });
       renderProducts();
     });
 
