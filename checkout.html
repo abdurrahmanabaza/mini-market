@@ -89,60 +89,79 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // تعبئة النموذج تلقائيًا من LocalStorage
+    // عناصر DOM
+    const userNameInput = document.getElementById('userName');
+    const userAddressInput = document.getElementById('userAddress');
+    const userPhoneInput = document.getElementById('userPhone');
+    const form = document.getElementById('userDataForm');
+    const cartSummaryDiv = document.getElementById('cartSummary');
+    const cartItemsUl = document.getElementById('cartItems');
+    const cartTotalSpan = document.getElementById('cartTotal');
+
+    // عند تحميل الصفحة
     window.addEventListener('DOMContentLoaded', () => {
+      // استرجاع البيانات من LocalStorage إذا كانت موجودة
       const saved = localStorage.getItem('userData');
       if (saved) {
         const data = JSON.parse(saved);
-        document.getElementById('userName').value = data.name || '';
-        document.getElementById('userAddress').value = data.address || '';
-        document.getElementById('userPhone').value = data.phone || '';
+        if (data.name) document.getElementById('userName').value = data.name;
+        if (data.address) document.getElementById('userAddress').value = data.address;
+        if (data.phone) document.getElementById('userPhone').value = data.phone;
       }
 
-      // عرض السلة إذا كانت محفوظة
+      // استرجاع السلة من LocalStorage
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       if (cart.length) {
-        const cartItems = document.getElementById('cartItems');
-        const cartTotal = document.getElementById('cartTotal');
         let total = 0;
         cart.forEach(item => {
           const li = document.createElement('li');
-          li.textContent = ${item.name} × ${item.qty} = ${item.price * item.qty} ل.س;
-          cartItems.appendChild(li);
+          li.textContent = `${item.name} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} ل.س`;
+          cartItemsUl.appendChild(li);
           total += item.price * item.qty;
         });
-        cartTotal.textContent = total.toLocaleString();
         document.getElementById('cartSummary').style.display = 'block';
+        cartTotalSpan.textContent = total.toFixed(2);
       }
     });
 
-    // إرسال الطلب وتخزين البيانات
-    document.getElementById('userDataForm').addEventListener('submit', function(e) {
+    // عند تقديم النموذج
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('userName').value.trim();
-const address = document.getElementById('userAddress').value.trim();
-      const phone = document.getElementById('userPhone').value.trim();
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const name = userNameInput.value.trim();
+      const address = userAddressInput.value.trim();
+      const phone = userPhoneInput.value.trim();
 
-      const newOrder = {
-        name, address, phone,
-        cart,
-        total,
-        timestamp: Date.now()
-      };
+      if (!name || !address || !phone) {
+        alert('يرجى ملء جميع البيانات');
+        return;
+      }
 
       // حفظ البيانات في LocalStorage
       localStorage.setItem('userData', JSON.stringify({ name, address, phone }));
 
-      // إرسال إلى Firebase
+      // استرجاع السلة من LocalStorage
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (cart.length === 0) {
+        alert('السلة فارغة');
+        return;
+      }
+
+      // إعداد البيانات لإرسالها
+      const newOrder = {
+        user: { name, address, phone },
+        cart: cart,
+        total: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      // إرسال الطلب إلى Firebase
       db.ref('userOrders').push(newOrder)
         .then(() => {
           alert('تم إرسال الطلب بنجاح!');
-          localStorage.removeItem('cart');
-          window.location.href = 'index.html'; // العودة للصفحة الرئيسية
+          // يمكن إضافة إعادة توجيه إلى الصفحة الرئيسية أو صفحة الشكر
+          window.location.href = 'index.html'; // استبدلها إذا لزم الأمر
         })
-        .catch(err => {
+        .catch((err) => {
           alert('حدث خطأ أثناء الإرسال: ' + err.message);
         });
     });
