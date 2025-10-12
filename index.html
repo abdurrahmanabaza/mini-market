@@ -1,256 +1,85 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <title>السوق الإلكتروني</title>
+  <meta charset="UTF-8">
+  <title>قائمة المواد</title>
+  <script type="module">
+    // استيراد مكتبات Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
+  authDomain: "local-products-82f7d.firebaseapp.com",
+  databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
+  projectId: "local-products-82f7d",
+  storageBucket: "local-products-82f7d.appspot.com",
+  messagingSenderId: "92892216531",
+  appId: "1:92892216531:web:b39013834c0215eaf2e826"
+};
+
+    // تهيئة التطبيق
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadProducts() {
+      const container = document.getElementById("products");
+      const querySnapshot = await getDocs(collection(db, "products"));
+
+      querySnapshot.forEach((doc) => {
+        const p = doc.data();
+        const card = document.createElement("div");
+        card.className = "product";
+        card.innerHTML = 
+          <img src="${p.image}" alt="${p.name}">
+          <h2>${p.name}</h2>
+          <p>الكمية: ${p.quantity}</p>
+          <p>السعر: ${p.price} دولار</p>
+        ;
+        container.appendChild(card);
+      });
+    }
+
+    loadProducts();
+  </script>
+
   <style>
-    body { font-family: Arial, sans-serif; direction: rtl; margin: 0; padding: 20px; background:#f5f7fb; color:#222; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    h1, h2 { text-align: center; color:#333; }
-    .products { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:10px; }
-    .product { width:220px; background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 10px rgba(0,0,0,0.06); text-align:center; }
-    .product h3 { margin:6px 0; font-size:16px; }
-    .product .price { color:#2a7a2a; font-weight:700; margin-bottom:8px; }
-    .quantity-controls { display:flex; gap:6px; justify-content:center; align-items:center; margin-bottom:8px; }
-    .quantity-controls button { padding:6px 8px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; }
-    .btn { display:inline-block; padding:8px 10px; background:#007bff; color:#fff; border-radius:6px; text-decoration:none; cursor:pointer; }
-    #cartItems li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee; }
+    body {
+      font-family: "Cairo", sans-serif;
+      background-color: #f7f7f7;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .product {
+      display: inline-block;
+      width: 250px;
+      margin: 15px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .product img {
+      width: 200px;
+      height: 200px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .product h2 {
+      margin: 10px 0 5px;
+    }
+    .product p {
+      margin: 5px 0;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-
-<div class="container" id="mainContent">
-  <h1>السوق الإلكتروني</h1>
-  <h2>منتجاتنا</h2>
-  <div class="products" id="productsContainer">جارٍ تحميل المنتجات...</div>
-</div>
-
-<div class="container" id="cartPage" style="display:none;">
-  <h2>السلة</h2>
-  <ul id="cartItems"></ul>
-  <div id="totalPrice">المجموع النهائي: 0 ل.س</div>
-  <button onclick="showMain()">العودة للمنتجات</button>
-</div>
-
-<div class="container" id="orderForm" style="display:none;">
-  <h3>بيانات التوصيل</h3>
-  <label>العنوان:</label>
-  <input type="text" id="deliveryAddress" />
-  <label>رقم الهاتف:</label>
-  <input type="text" id="phoneNumber" />
-  <button onclick="confirmOrder()">تأكيد الطلب</button>
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
-  authDomain: "local-products-82f7d.firebaseapp.com",
-  databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
-  projectId: "local-products-82f7d",
-  storageBucket: "local-products-82f7d.appspot.com",
-  messagingSenderId: "92892216531",
-  appId: "1:92892216531:web:b39013834c0215eaf2e826"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let items = [];
-let cart = [];
-let filteredItems = [];
-
-function loadProducts() {
-  db.ref("products").once("value").then(snapshot => {
-    const data = snapshot.val();
-    const container = document.getElementById("productsContainer");
-    container.innerHTML = "";
-    if (!data) {
-      container.innerHTML = "لا توجد منتجات في القاعدة";
-      return;
-    }
-    items = Object.values(data);
-    filteredItems = [...items];
-    renderProducts();
-  }).catch(err => {
-    console.error("خطأ:", err);
-    document.getElementById("productsContainer").innerText = "فشل الاتصال بقاعدة البيانات";
-  });
-}
-
-function renderProducts() {
-  const container = document.getElementById("productsContainer");
-  container.innerHTML = "";
-  filteredItems.forEach((item, index) => {
-    container.innerHTML += 
-      <div class="product">
-        <h3>${item.name}</h3>
-        <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
-        <div class="quantity-controls">
-          <button onclick="decreaseQty(${index})">-</button>
-          <input type="text" id="qtyInput${index}" value="1" readonly />
-          <button onclick="increaseQty(${index}, ${item.quantity})">+</button>
-        </div>
-        <a href="#" class="btn" onclick="addToCart(event, ${index})">إضافة إلى السلة</a>
-      </div>
-    ;
-  });
-}
-
-function increaseQty(index, max) {
-  const input = document.getElementById(qtyInput${index});
-  let val = parseInt(input.value);
-  if (val < max) input.value = val + 1;
-}
-  function decreaseQty(index) {
-  const input = document.getElementById(qtyInput${index});
-  let val = parseInt(input.value);
-  if (val > 1) input.value = val - 1;
-}
-
-function addToCart(e, index) {
-  e.preventDefault();
-  const qty = parseInt(document.getElementById(qtyInput${index}).value);
-  const item = items[index];
-  cart.push({ ...item, qty });
-  alert("تمت إضافة المنتج إلى السلة");
-}
-
-function showMain() {
-  document.getElementById("mainContent").style.display = "block";
-  document.getElementById("cartPage").style.display = "none";
-  document.getElementById("orderForm").style.display = "none";
-}
-
-function showCart() {
-  document.getElementById("mainContent").style.display = "none";
-  document.getElementById("cartPage").style.display = "block";
-  document.getElementById("orderForm").style.display = "none";
-  renderCart();
-}
-
-function renderCart() {
-  const container = document.getElementById("cartItems");
-  container.innerHTML = "";
-  let total = 0;
-  cart.forEach((item, i) => {
-    total += item.value * item.qty;
-    container.innerHTML += 
-      <li>${item.name} × ${item.qty} <span>${(item.value * item.qty).toLocaleString()} ل.س</span></li>
-    ;
-  });
- = {
-  apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
-  authDomain: "local-products-82f7d.firebaseapp.com",
-  databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
-  projectId: "local-products-82f7d",
-  storageBucket: "local-products-82f7d.appspot.com",
-  messagingSenderId: "92892216531",
-  appId: "1:92892216531:web:b39013834c0215eaf2e826"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let items = [];
-let cart = [];
-let filteredItems = [];
-
-function loadProducts() {
-  db.ref("products").once("value").then(snapshot => {
-    const data = snapshot.val();
-    const container = document.getElementById("productsContainer");
-    container.innerHTML = "";
-    if (!data) {
-      container.innerHTML = "لا توجد منتجات في القاعدة";
-      return;
-    }
-    items = Object.values(data);
-    filteredItems = [...items];
-    renderProducts();
-  }).catch(err => {
-    console.error("خطأ:", err);
-    document.getElementById("productsContainer").innerText = "فشل الاتصال بقاعدة البيانات";
-  });
-}
-
-function renderProducts() {
-  const container = document.getElementById("productsContainer");
-  container.innerHTML = "";
-  filteredItems.forEach((item, index) => {
-    container.innerHTML += 
-      <div class="product">
-        <h3>${item.name}</h3>
-        <p class="price">السعر: ${item.value.toLocaleString()} ل.س</p>
-        <div class="quantity-controls">
-          <button onclick="decreaseQty(${index})">-</button>
-          <input type="text" id="qtyInput${index}" value="1" readonly />
-          <button onclick="increaseQty(${index}, ${item.quantity})">+</button>
-        </div>
-        <a href="#" class="btn" onclick="addToCart(event, ${index})">إضافة إلى السلة</a>
-      </div>
-    ;
-  });
-}
-
-function increaseQty(index, max) {
-  const input = document.getElementById(qtyInput${index});
-  let val = parseInt(input.value);
-  if (val < max) input.value = val + 1;
-}
-
-function decreaseQty(index) {
-  const input = document.getElementById(qtyInput${index});
-  let val = parseInt(input.value);
-  if (val > 1) input.value = val - 1;
-}
-
-function addToCart(e, index) {
-  e.preventDefault();
-  const qty = parseInt(document.getElementById(qtyInput${index}).value);
-  const item = items[index];
-  cart.push({ ...item, qty });
-  alert("تمت إضافة المنتج إلى السلة");
-}
-
-function showMain() {
-  document.getElementById("mainContent").style.display = "block";
-  document.getElementById("cartPage").style.display = "none";
-  document.getElementById("orderForm").style.display = "none";
-}
-
-function showCart() {
-  document.getElementById("mainContent").style.display = "none";
-  document.getElementById("cartPage").style.display = "block";
-  document.getElementById("orderForm").style.display = "none";
-  renderCart();
-}
-  function renderCart() {
-  const container = document.getElementById("cartItems");
-  container.innerHTML = "";
-  let total = 0;
-  cart.forEach((item, i) => {
-    total += item.value * item.qty;
-    container.innerHTML += 
-      <li>${item.name} × ${item.qty} <span>${(item.value * item.qty).toLocaleString()} ل.س</span></li>
-    ;
-  });
-  document.getElementById("totalPrice").innerText = المجموع النهائي: ${total.toLocaleString()} ل.س;
-}
-
-function confirmOrder() {
-  const address = document.getElementById("deliveryAddress").value;
-  const phone = document.getElementById("phoneNumber").value;
-  if (!address || !phone) return alert("يرجى تعبئة جميع الحقول");
-  alert("تم إرسال الطلب بنجاح!");
-  cart = [];
-  showMain();
-}
-
-loadProducts();
-</script>
+  <h1>قائمة المواد</h1>
+  <div id="products"></div>
 </body>
 </html>
