@@ -51,7 +51,7 @@
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
-<!-- قسم عرض معلومات المادة الخاصة (تمت إضافته) -->
+<!-- قسم عرض معلومات المادة الخاصة -->
 <div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
   <h4>معلومات المادة الخاصة</h4>
   <div>الوزن: <span id="specialWeight"></span></div>
@@ -128,7 +128,6 @@ let filtered = [];
 let cart = [];
 let specialPrices = [];
 
-// تحميل أسعار المادة الخاصة
 function loadSpecialPrices() {
   db.ref('products/0/prices').once('value')
     .then(snap => {
@@ -155,17 +154,14 @@ function populateSpecialPriceOptions() {
     select.appendChild(option);
   });
   document.getElementById('specialPriceSection').style.display='block';
-  // عرض السعر عند التغيير
   select.onchange=()=>{
     const selected=specialPrices[select.value];
     document.getElementById('selectedPriceDisplay').innerText=selected.price.toLocaleString();
   };
-  // اختيار افتراضي
   select.value=0;
   document.getElementById('selectedPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
 }
 
-// تحميل المنتجات
 function loadProducts() {
   productsEl.innerHTML='جارٍ التحميل...';
   db.ref('products').once('value')
@@ -240,16 +236,27 @@ function addToCart(id){
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
 
   if(id===0){
-    // للمادة الخاصة
     const select=document.getElementById('specialPriceSelect');
     const selected=specialPrices[select.value];
-    // عرض المعلومات في القسم المخصص
+    // عرض المعلومات
     document.getElementById('specialWeight').innerText=selected.weight;
     document.getElementById('specialPriceDisplay').innerText=selected.price.toLocaleString();
     document.getElementById('specialInfoDisplay').style.display='block';
 
     // إضافة للسلة
     cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
+    // حذف الخيار من الـ select
+    select.removeChild(select.options[select.value]);
+    // إعادة تعيين
+    if(select.options.length>0){
+      select.value=0;
+      // تحديث السعر المعروض
+      const newSelected=specialPrices[select.value];
+      document.getElementById('selectedPriceDisplay').innerText=newSelected.price.toLocaleString();
+    } else {
+      // لا توجد خيارات متبقية
+      document.getElementById('specialPriceSection').style.display='none';
+    }
   } else {
     const existing=cart.find(c=>c.id===id);
     if(existing){
