@@ -205,9 +205,10 @@ function addToCart(id){
 }
 
 function showDetails(id){
+  id=Number(id);
   const p=products.find(x=>x.id===id);
   if(!p) return alert('تفاصيل غير متاحة');
-  alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity));
+  alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity)+'\n'+(p.detls));
 }
 
 function updateCartUI() {
