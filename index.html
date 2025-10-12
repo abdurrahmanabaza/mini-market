@@ -111,9 +111,10 @@
    function loadProducts() {
   productsEl.innerHTML = 'جارٍ التحميل...';
 
-  db.ref('products').on(
-    "value",
-    function(snap) {
+ function loadProducts() {
+  productsEl.innerHTML = 'جارٍ التحميل...';
+  db.ref('products').once('value')
+    .then(function(snap) {
       const data = snap.val();
       if (!data) {
         productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
@@ -132,15 +133,20 @@
       });
       filtered = products.slice();
       renderProducts();
-    },
-    function(error) {
-      // معالج الخطأ في حالة فشل الاستماع
+    })
+    .catch(function(error) {
       productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
       logEl.innerText = 'تفاصيل الخطأ: ' + (error.message || error);
-      console.error('خطأ في الاستماع:', error);
-    }
-  );
+      console.error('خطأ في تحميل المنتجات:', error);
+    });
 }
+
+// استدعاء التحديث كل دقيقة
+setInterval(loadProducts, 60000);
+
+// في البداية، حمّل البيانات
+loadProducts();
+   }
 
     // رندر المنتجات (لا توجد صور هنا)
     function renderProducts() {
