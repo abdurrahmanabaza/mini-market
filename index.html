@@ -19,6 +19,21 @@
     .btn-sec{background:#eef2ff;color:#0f62fe}
     #cartBtn{background:#06b6d4;color:#fff;border-radius:8px;padding:8px 10px}
     #log{margin-top:12px;color:#b91c1c}
+    @media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  input[type="search"] {
+    width: 100%;
+  }
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #cartPanel {
+    font-size: 14px;
+  }
+}
   </style>
 </head>
 <body>
