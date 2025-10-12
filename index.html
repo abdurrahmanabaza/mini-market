@@ -91,7 +91,7 @@
 </main>
 </div>
 
-<!-- Firebase SDKs (compat) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -108,7 +108,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// عناصر DOM
 const productsEl = document.getElementById('products');
 const countEl = document.getElementById('count');
 const searchEl = document.getElementById('search');
@@ -116,12 +115,6 @@ const cartBtn = document.getElementById('cartBtn');
 const cartPanel = document.getElementById('cartPanel');
 const cartList = document.getElementById('cartList');
 const cartTotal = document.getElementById('cartTotal');
-const clearCart = document.getElementById('clearCart');
-const startOrderBtn = document.getElementById('startOrder');
-const logEl = document.getElementById('log');
-const openUserFormBtn = document.getElementById('openUserForm');
-const userFormContainer = document.getElementById('userFormContainer');
-const userForm = document.getElementById('userForm');
 
 let products = [];
 let filtered = [];
@@ -236,26 +229,35 @@ function addToCart(id){
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
 
   if(id===0){
-    // عند إضافة المادة الخاصة، يظهر القسم ويطلب تأكيد
-    const select=document.getElementById('specialPriceSelect');
-    // إذا لم يكن القسم ظاهرًا، أظهرة
+    // إظهار قسم المادة الخاصة
     document.getElementById('specialPriceSection').style.display='block';
+    const select=document.getElementById('specialPriceSelect');
+    select.innerHTML=''; // تفريغ الخيارات
+    // تعبئة الخيارات
+    specialPrices.forEach((item, index) => {
+      const option=document.createElement('option');
+      option.value=index;
+      option.text=`وزن: ${item.weight} - السعر: ${item.price.toLocaleString()} ل.س`;
+      select.appendChild(option);
+    });
     // اختيار أول خيار بشكل افتراضي
     select.value=0;
     document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
     // عرض المعلومات
     document.getElementById('specialWeight').innerText=specialPrices[0].weight;
     document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
-    
+
     // طلب تأكيد
-    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')) {
-      // إضافة للسلة
-      const selected=specialPrices[select.value];
+    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')){
+      const selectedIndex=select.value;
+      const selected=specialPrices[selectedIndex];
       cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
-      // جعل القسم مخفي بعد الإضافة
+      // إخفاء القسم بعد التأكيد والإضافة
       document.getElementById('specialPriceSection').style.display='none';
     } else {
-      // إذا لم يؤكد، إلغاء الإضافة
+      // إلغاء الإضافة
+      // إخفاء القسم
+      document.getElementById('specialPriceSection').style.display='none';
       return;
     }
   } else {
@@ -270,12 +272,11 @@ function addToCart(id){
   updateCartUI();
 }
 
-// عند الضغط على زر السلة، يظهر القسم إذا كان مخفي
+// عند الضغط على زر السلة، يظهر ويشغل تمرير لأسفل
 document.getElementById('cartBtn').addEventListener('click', () => {
   const panel=document.getElementById('cartPanel');
   panel.style.display=panel.style.display==='none'?'block':'none';
   renderCart();
-  // عند الضغط، التمرير لأسفل
   if(panel.style.display==='block'){
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
