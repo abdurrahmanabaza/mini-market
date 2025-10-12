@@ -44,16 +44,16 @@
   </div>
 </header>
 
-<!-- قسم خاص بأسعار المادة ذات الـ id=0 -->
+<!-- قسم المادة الخاصة مخفي بشكل افتراضي -->
 <div id="specialPriceSection" style="margin-top:20px; display:none; border:1px solid #ccc; padding:10px; border-radius:8px;">
-  <h3>اختر السعر</h3>
+  <h3>اختر السعر للمادة الخاصة</h3>
   <select id="specialPriceSelect"></select>
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
-<!-- قسم عرض معلومات المادة الخاصة -->
+<!-- قسم عرض معلومات المادة الخاصة مخفي بشكل افتراضي -->
 <div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
-  <h4>تفاصيل الكميات المتوفرة</h4>
+  <h4>معلومات المادة الخاصة</h4>
   <div>الوزن: <span id="specialWeight"></span></div>
   <div>السعر: <span id="specialPriceDisplay"></span> ل.س</div>
 </div>
@@ -236,26 +236,27 @@ function addToCart(id){
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
 
   if(id===0){
+    // عند إضافة المادة الخاصة، يظهر القسم ويطلب تأكيد
     const select=document.getElementById('specialPriceSelect');
-    const selected=specialPrices[select.value];
+    // إذا لم يكن القسم ظاهرًا، أظهرة
+    document.getElementById('specialPriceSection').style.display='block';
+    // اختيار أول خيار بشكل افتراضي
+    select.value=0;
+    document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
     // عرض المعلومات
-    document.getElementById('specialWeight').innerText=selected.weight;
-    document.getElementById('specialPriceDisplay').innerText=selected.price.toLocaleString();
-    document.getElementById('specialInfoDisplay').style.display='block';
-
-    // إضافة للسلة
-    cart.push({id:0, name:'جبنة شركسية', weight:selected.weight, price:selected.price, qty:1});
-    // حذف الخيار من الـ select
-    select.removeChild(select.options[select.value]);
-    // إعادة تعيين
-    if(select.options.length>0){
-      select.value=0;
-      // تحديث السعر المعروض
-      const newSelected=specialPrices[select.value];
-      document.getElementById('selectedPriceDisplay').innerText=newSelected.price.toLocaleString();
-    } else {
-      // لا توجد خيارات متبقية
+    document.getElementById('specialWeight').innerText=specialPrices[0].weight;
+    document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+    
+    // طلب تأكيد
+    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')) {
+      // إضافة للسلة
+      const selected=specialPrices[select.value];
+      cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
+      // جعل القسم مخفي بعد الإضافة
       document.getElementById('specialPriceSection').style.display='none';
+    } else {
+      // إذا لم يؤكد، إلغاء الإضافة
+      return;
     }
   } else {
     const existing=cart.find(c=>c.id===id);
@@ -268,6 +269,17 @@ function addToCart(id){
   }
   updateCartUI();
 }
+
+// عند الضغط على زر السلة، يظهر القسم إذا كان مخفي
+document.getElementById('cartBtn').addEventListener('click', () => {
+  const panel=document.getElementById('cartPanel');
+  panel.style.display=panel.style.display==='none'?'block':'none';
+  renderCart();
+  // عند الضغط، التمرير لأسفل
+  if(panel.style.display==='block'){
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+});
 
 function showDetails(id){
   id=Number(id);
@@ -282,12 +294,6 @@ function updateCartUI() {
   renderCart();
   localStorage.setItem('cart', JSON.stringify(cart));
 }
-
-document.getElementById('cartBtn').addEventListener('click', () => {
-  const panel=document.getElementById('cartPanel');
-  panel.style.display=panel.style.display==='none'?'block':'none';
-  renderCart();
-});
 
 function renderCart() {
   const ul=document.getElementById('cartList');
