@@ -3,81 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>سوق عصري - عرض منتجات</title>
+  <title>سوق - اختبار Firebase</title>
   <style>
-    :root{
-      --bg:#f6f8fb; --card:#ffffff; --muted:#6b7280; --accent:#0f62fe; --success:#16a34a;
-      --maxw:1200px;
-      --radius:12px;
-      --shadow: 0 6px 18px rgba(15,34,63,0.08);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter, "Segoe UI", Tahoma, Arial;direction:rtl;background:var(--bg);color:#0f172a}
-    .wrap{max-width:var(--maxw);margin:28px auto;padding:18px}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
-    header h1{font-size:20px;margin:0}
-    .controls{display:flex;gap:8px;align-items:center}
-    input[type="search"]{padding:10px 12px;border-radius:10px;border:1px solid #e6e9ef;min-width:220px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
-    .thumb{width:100%;height:160px;object-fit:cover;background:#eef2ff}
-    .body{padding:12px;flex:1;display:flex;flex-direction:column;gap:8px}
-    .title{font-weight:700;font-size:15px;color:#0b1726}
-    .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-    .price{color:var(--success);font-weight:800}
-    .qty{font-weight:600;color:#0f172a;background:#f3f7fb;padding:6px 8px;border-radius:8px}
+    body{font-family:Arial,Helvetica,sans-serif;direction:rtl;padding:18px;background:#f5f7fb;color:#0b1726}
+    .wrap{max-width:980px;margin:0 auto}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    input[type="search"]{padding:8px;border-radius:8px;border:1px solid #d7dbe6;width:260px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+    .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.06);display:flex;flex-direction:column;gap:8px}
+    .title{font-weight:700}
+    .meta{display:flex;justify-content:space-between;align-items:center;color:#6b7280;font-size:13px}
     .actions{display:flex;gap:8px;margin-top:8px}
-    .btn{flex:1;padding:9px 10px;border-radius:10px;border:0;cursor:pointer;font-weight:700;color:#fff;background:var(--accent)}
-    .btn.secondary{background:#475569}
-    .badge{padding:6px 8px;background:#111827;color:#fff;border-radius:999px;font-size:12px}
-    footer{margin-top:26px;text-align:center;color:var(--muted);font-size:13px}
-    @media (max-width:520px){ .thumb{height:120px} input[type="search"]{min-width:140px} header{flex-direction:column;align-items:flex-start;gap:12px} }
+    button{padding:8px 10px;border-radius:8px;border:0;cursor:pointer}
+    .btn-primary{background:#0f62fe;color:#fff}
+    .btn-sec{background:#eef2ff;color:#0f62fe}
+    #cartBtn{background:#06b6d4;color:#fff;border-radius:8px;padding:8px 10px}
+    #log{margin-top:12px;color:#b91c1c}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div>
-        <h1>السوق العصري</h1>
-        <div style="color:var(--muted);font-size:13px">منتجات متاحة للعرض والشراء</div>
+        <h1 style="margin:0">سوق الاختبار</h1>
+        <div style="color:#6b7280;font-size:13px">تأكد من تعبئة firebaseConfig وتجهيز قاعدة products</div>
       </div>
-
-      <div class="controls">
-        <div class="badge" id="itemsCount">--</div>
-        <input type="search" id="search" placeholder="ابحث باسم المنتج..." />
-        <button class="btn secondary" id="viewCartBtn">عرض السلة</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="count" style="background:#eef2ff;padding:6px 8px;border-radius:8px">--</div>
+        <input id="search" type="search" placeholder="ابحث باسم المنتج..." />
+        <button id="cartBtn">السلة (0)</button>
       </div>
     </header>
 
     <main>
-      <section class="grid" id="productsGrid">
-        <!-- المنتجات ستُضاف هنا ديناميكياً -->
-      </section>
+      <section id="products" class="grid">جارٍ التحميل...</section>
 
-      <section id="cartPanel" style="display:none;margin-top:18px;">
-        <h2 style="font-size:16px;margin-bottom:8px">السلة</h2>
-        <ul id="cartList" style="list-style:none;padding:0;margin:0;display:block;gap:8px"></ul>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
-          <div style="font-weight:700">الإجمالي: <span id="cartTotal">0</span> ل.س</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn secondary" id="clearCart">تفريغ السلة</button>
-            <button class="btn" id="checkout">تأكيد الطلب</button>
-          </div>
+      <section id="cartPanel" style="display:none;margin-top:14px">
+        <h3>السلة</h3>
+        <ul id="cartList" style="padding:0;margin:0;list-style:none"></ul>
+        <div style="margin-top:10px;font-weight:700">الإجمالي: <span id="cartTotal">0</span> ل.س</div>
+        <div style="margin-top:8px">
+          <button id="clearCart" class="btn-sec">تفريغ السلة</button>
+          <button id="checkout" class="btn-primary">تأكيد الطلب</button>
         </div>
       </section>
-    </main>
 
-    <footer>
-      <div>جميع الحقوق محفوظة &middot; السوق العصري</div>
-    </footer>
+      <div id="log"></div>
+    </main>
   </div>
 
-  <!-- Firebase SDKs (compat لإبقائها بسيطة وسهلة الاستخدام هنا) -->
+  <!-- Firebase SDKs (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
   authDomain: "local-products-82f7d.firebaseapp.com",
   databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
@@ -86,150 +66,172 @@
   messagingSenderId: "92892216531",
   appId: "1:92892216531:web:b39013834c0215eaf2e826"
 };
-    /**************/
+    // =====================================================
 
     // تهيئة Firebase
-    firebase.initializeApp(firebaseConfig);
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+      document.getElementById('log').innerText = 'خطأ في تهيئة Firebase: ' + e.message;
+    }
     const db = firebase.database();
 
     // عناصر DOM
-    const productsGrid = document.getElementById('productsGrid');
-    const itemsCount = document.getElementById('itemsCount');
-    const searchInput = document.getElementById('search');
-    const viewCartBtn = document.getElementById('viewCartBtn');
+    const productsEl = document.getElementById('products');
+    const countEl = document.getElementById('count');
+    const searchEl = document.getElementById('search');
+    const cartBtn = document.getElementById('cartBtn');
     const cartPanel = document.getElementById('cartPanel');
     const cartList = document.getElementById('cartList');
-    const cartTotalEl = document.getElementById('cartTotal');
-    const clearCartBtn = document.getElementById('clearCart');
-    const checkoutBtn = document.getElementById('checkout');
+    const cartTotal = document.getElementById('cartTotal');
+    const clearCart = document.getElementById('clearCart');
+    const checkout = document.getElementById('checkout');
+    const logEl = document.getElementById('log');
 
-    // بيانات محلية للسلة
-    let products = []; // كل المنتجات كمصفوفة { id, name, image, price, quantity }
-    let cart = [];     // عناصر السلة { id, name, price, qty }
-
-    // تحميل المنتجات من المسار "products"
+    // بيانات محلية
+    let products = []; // [{id, name, quantity, price}]
+    let filtered = [];
+    let cart = [];     // [{id, name, price, qty}]
+    // تحميل البيانات من المسار products
     function loadProducts() {
-      productsGrid.innerHTML = 'جارٍ تحميل...';
+      productsEl.innerHTML = 'جارٍ التحميل...';
       db.ref('products').once('value')
-        .then(snapshot => {
-          const data = snapshot.val();
+        .then(snap => {
+          const data = snap.val();
           if (!data) {
-            productsGrid.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
-            itemsCount.innerText = '0';
+            productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
+            countEl.innerText = '0';
             return;
           }
-          // نحول المفاتيح الى id ونحتفظ بها
+          // تحويل المفاتيح إلى id (يحمي من اختلاف مفاتيح رقمية أو نصية)
           products = Object.entries(data).map(([key, val]) => ({
             id: key,
             name: val.name || '',
-            image: val.image || '', // يمكن أن يكون رابط أو مسار؛ تركناه جاهزاً
-            price: Number(val.price ?? val.value ?? 0),
-            quantity: Number(val.quantity ?? 0)
+            quantity: Number(val.quantity || 0),
+            price: Number(val.price ?? val.value ?? 0)
           }));
-          filteredRender(products);
+          filtered = [...products];
+          renderProducts();
         })
         .catch(err => {
-          console.error('خطأ بالاتصال بقاعدة البيانات:', err);
-          productsGrid.innerHTML = '<div style="color:#b91c1c">فشل الاتصال بقاعدة البيانات</div>';
-          itemsCount.innerText = '--';
+          productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
+          logEl.innerText = 'تفاصيل الخطأ: ' + (err.message || err);
+          console.error(err);
         });
     }
 
-    // عرض المنتجات (مع إمكانية تمرير مصفوفة فرعية للفلترة)
-    function filteredRender(list) {
-      productsGrid.innerHTML = '';
-      if (!list.length) {
-        productsGrid.innerHTML = '<div style="color:#6b7280">لا توجد نتائج</div>';
-        itemsCount.innerText = '0';
+    // رندر المنتجات (لا توجد صور هنا)
+    function renderProducts() {
+      productsEl.innerHTML = '';
+      if (!filtered.length) {
+        productsEl.innerHTML = '<div style="color:#6b7280">لا توجد نتائج</div>';
+        countEl.innerText = '0';
         return;
       }
-      itemsCount.innerText = String(list.length);
-      list.forEach((p, idx) => {
-        // تأكد من القيم الافتراضية لتفادي خطأ Unexpected token
-        const priceStr = Number(p.price || 0).toLocaleString();
-        const qty = Number(p.quantity || 0);
-        // صفحة بطاقية لكل منتج - بدون كسر للسطر داخل الـ template literal
-        productsGrid.innerHTML += 
-          <article class="card">
-            <img class="thumb" src="${p.image || ''}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">
-            <div class="body">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div class="title">${escapeHtml(p.name)}</div>
-                <div class="meta"><div class="price">${priceStr} ل.س</div></div>
-              </div>
-              <div class="meta">الكمية المتاحة: <span class="qty">${qty}</span></div>
-              <div class="actions">
-                <button class="btn secondary" onclick="quickView('${p.id}')">تفاصيل</button>
-                <button class="btn" onclick="addToCart('${p.id}')">أضف للسلة</button>
-              </div>
-            </div>
-          </article>
+      countEl.innerText = String(filtered.length);
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = 
+          <div class="title">${escapeHtml(p.name)}</div>
+          <div class="meta"><div>السعر: <strong>${p.price.toLocaleString()}</strong> ل.س</div><div>الكمية: <span>${p.quantity}</span></div></div>
+          <div class="actions">
+            <button class="btn-sec" data-action="details" data-id="${p.id}">تفاصيل</button>
+            <button class="btn-primary" data-action="add" data-id="${p.id}">أضف للسلة</button>
+          </div>
         ;
+        productsEl.appendChild(card);
       });
     }
 
-    // حماية بسيطة للـ HTML المضمّن
+    // حماية HTML بسيطة
     function escapeHtml(text){
-      return String(text || '').replace(/[&<>"'`=\/]/g, function(s){ return '&#'+s.charCodeAt(0)+';'; });
+      return String(text || '').replace(/[&<>"'=\/]/g, function(s){ return '&#'+s.charCodeAt(0)+';'; });
     }
-      // بحث مباشر
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim().toLowerCase();
-      if (!q) return filteredRender(products);
-      const filtered = products.filter(p => (p.name || '').toLowerCase().includes(q));
-      filteredRender(filtered);
+
+    // تفويض الأحداث (يوفر تجنب مشاكل scope مع inline onclick)
+    productsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      if (action === 'add') addToCart(id);
+      if (action === 'details') showDetails(id);
     });
 
-    // إضافة للسلة بحدّ افتراضي 1
-    function addToCart(id){
-      const prod = products.find(p => p.id === id);
-      if (!prod) { alert('المنتج غير موجود'); return; }
-      if (prod.quantity <= 0) { alert('نفذت الكمية'); return; }
+    function addToCart(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) { alert('المنتج غير موجود'); return; }
+      if (p.quantity <= 0) { alert('الكمية غير متاحة'); return; }
       const existing = cart.find(c => c.id === id);
       if (existing) {
-        if (existing.qty + 1 > prod.quantity) { alert('الكمية المطلوبة أكبر من المتاح'); return; }
-        existing.qty += 1;
+        if (existing.qty + 1 > p.quantity) { alert('تجاوزت الكمية المتاحة'); return; }
+        existing.qty++;
       } else {
-        cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1, max: prod.quantity });
+        cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, max: p.quantity });
       }
+      updateCartUI();
+    }
+
+    function showDetails(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return alert('تفاصيل غير متاحة');
+      alert(${p.name}\nالسعر: ${p.price.toLocaleString()} ل.س\nالكمية المتاحة: ${p.quantity});
+    }
+
+    function updateCartUI() {
+      cartBtn.innerText = السلة (${cart.reduce((s, i) => s + i.qty, 0)})`;
       renderCart();
     }
 
-    // عرض السلة/إخفاؤها
-    viewCartBtn.addEventListener('click', () => {
+    cartBtn.addEventListener('click', () => {
       cartPanel.style.display = cartPanel.style.display === 'none' ? 'block' : 'none';
       renderCart();
       cartPanel.scrollIntoView({behavior:'smooth'});
     });
 
-    // عرض محتوى السلة
-    function renderCart(){
+    function renderCart() {
       cartList.innerHTML = '';
       if (!cart.length) {
-        cartList.innerHTML = '<li style="color:var(--muted)">السلة فارغة</li>';
-        cartTotalEl.innerText = '0';
+        cartList.innerHTML = '<li style="color:#6b7280">السلة فارغة</li>';
+        cartTotal.innerText = '0';
         return;
       }
       let total = 0;
       cart.forEach(item => {
         total += item.price * item.qty;
-        cartList.innerHTML += 
-          <li style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eef2ff">
-            <div style="min-width:160px">${escapeHtml(item.name)}</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn secondary" style="padding:6px 8px" onclick="changeQty('${item.id}', -1)">-</button>
-              <div style="min-width:28px;text-align:center">${item.qty}</div>
-              <button class="btn" style="padding:6px 8px" onclick="changeQty('${item.id}', 1)">+</button>
-              <div style="min-width:120px;text-align:right">${Number(item.price * item.qty).toLocaleString()} ل.س</div>
-              <button class="btn secondary" style="padding:6px 8px" onclick="removeFromCart('${item.id}')">حذف</button>
-            </div>
-          </li>
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.padding = '6px 0';
+        li.innerHTML = 
+          <div>${escapeHtml(item.name)}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button data-id="${item.id}" data-op="minus" class="btn-sec">-</button>
+            <div>${item.qty}</div>
+            <button data-id="${item.id}" data-op="plus" class="btn-primary">+</button>
+            <div style="min-width:100px;text-align:right">${(item.price * item.qty).toLocaleString()} ل.س</div>
+            <button data-id="${item.id}" data-op="remove" class="btn-sec">حذف</button>
+          </div>
         ;
+        cartList.appendChild(li);
       });
-      cartTotalEl.innerText = total.toLocaleString();
+      cartTotal.innerText = total.toLocaleString();
     }
 
-    function changeQty(id, delta){
+    // تفويض أحداث عناصر السلة
+    cartList.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const op = btn.dataset.op;
+      if (op === 'plus') changeQty(id, 1);
+      if (op === 'minus') changeQty(id, -1);
+      if (op === 'remove') removeFromCart(id);
+    });
+
+    function changeQty(id, delta) {
       const it = cart.find(c => c.id === id);
       if (!it) return;
       const prod = products.find(p => p.id === id);
@@ -237,43 +239,36 @@
       if (newQty <= 0) return;
       if (newQty > (prod ? prod.quantity : it.max)) { alert('تجاوزت الكمية المتاحة'); return; }
       it.qty = newQty;
-      renderCart();
+      updateCartUI();
     }
 
-    function removeFromCart(id){
+    function removeFromCart(id) {
       cart = cart.filter(c => c.id !== id);
-      renderCart();
+      updateCartUI();
     }
 
-    clearCartBtn.addEventListener('click', () => {
+    clearCart.addEventListener('click', () => {
       if (!cart.length) return;
-      if (confirm('هل تريد تفريغ السلة؟')) { cart = []; renderCart(); }
+      if (confirm('هل تريد تفريغ السلة؟')) { cart = []; updateCartUI(); }
     });
 
-    checkoutBtn.addEventListener('click', () => {
-      if (!cart.length) { alert('السلة فارغة'); return; }
-      // هذه نقطة لإرسال الطلب إلى قاعدة البيانات (مثال: حفظ داخل مسار orders)
+    checkout.addEventListener('click', () => {
+      if (!cart.length) return alert('السلة فارغة');
       const order = { items: cart.map(i => ({id:i.id,name:i.name,price:i.price,qty:i.qty})), createdAt: Date.now() };
       db.ref('orders').push(order)
-        .then(()=> { alert('تم حفظ الطلب'); cart=[]; renderCart(); })
-        .catch(err => { console.error(err); alert('فشل حفظ الطلب'); });
+        .then(()=> { alert('تم تسجيل الطلب'); cart=[]; updateCartUI(); })
+        .catch(err=> { console.error(err); alert('فشل إرسال الطلب'); });
     });
 
-    // دالة سريعة لعرض تفاصيل (مثال) — يمكن توسيعها
-    function quickView(id){
-      const p = products.find(x => x.id === id);
-      if (!p) return alert('تفاصيل غير متاحة');
-      alert(${p.name}\nالسعر: ${p.price.toLocaleString()} ل.س\nالكمية: ${p.quantity});
-    }
+    // بحث مباشر
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.trim().toLowerCase();
+      filtered = products.filter(p => p.name.toLowerCase().includes(q));
+      renderProducts();
+    });
 
-    // تحميل أولي
+    // حمل البيانات مباشرة
     loadProducts();
-
-    // Expose to window for inline onclick in template
-    window.addToCart = addToCart;
-    window.changeQty = changeQty;
-    window.removeFromCart = removeFromCart;
-    window.quickView = quickView;
   </script>
 </body>
 </html>
