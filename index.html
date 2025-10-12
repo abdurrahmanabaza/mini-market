@@ -46,14 +46,14 @@
 
 <!-- قسم خاص بأسعار المادة ذات الـ id=0 -->
 <div id="specialPriceSection" style="margin-top:20px; display:none; border:1px solid #ccc; padding:10px; border-radius:8px;">
-  <h3>اختر السعر للمادة الخاصة</h3>
+  <h3>اختر السعر</h3>
   <select id="specialPriceSelect"></select>
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
 <!-- قسم عرض معلومات المادة الخاصة -->
 <div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
-  <h4>معلومات المادة الخاصة</h4>
+  <h4>تفاصيل الكميات المتوفرة</h4>
   <div>الوزن: <span id="specialWeight"></span></div>
   <div>السعر: <span id="specialPriceDisplay"></span> ل.س</div>
 </div>
@@ -244,7 +244,7 @@ function addToCart(id){
     document.getElementById('specialInfoDisplay').style.display='block';
 
     // إضافة للسلة
-    cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
+    cart.push({id:0, name:'جبنة شركسية', weight:selected.weight, price:selected.price, qty:1});
     // حذف الخيار من الـ select
     select.removeChild(select.options[select.value]);
     // إعادة تعيين
