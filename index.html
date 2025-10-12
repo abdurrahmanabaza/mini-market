@@ -108,34 +108,39 @@
     let filtered = [];
     let cart = [];     // [{id, name, price, qty}]
     // تحميل البيانات من المسار products
-    function loadProducts() {
-      productsEl.innerHTML = 'جارٍ التحميل...';
-      db.ref('products').on("value",function(snap) {
-          const data = snap.val();
-          if (!data) {
-            productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
-            countEl.innerText = '0';
-            return;
-          }
-          products = Object.entries(data).map(function(entry) {
-            var key = entry[0];
-            var val = entry[1] || {};
-            return {
-              id: key,
-              name: val.name || '',
-              quantity: Number(val.quantity || 0),
-              price: Number(val.price !== undefined ? val.price : (val.value !== undefined ? val.value : 0))
-            };
-          });
-          filtered = products.slice();
-          renderProducts();
-        })
-        .catch(function(err) {
-          productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
-          logEl.innerText = 'تفاصيل الخطأ: ' + (err.message || err);
-          console.error(err);
-        });
+   function loadProducts() {
+  productsEl.innerHTML = 'جارٍ التحميل...';
+
+  db.ref('products').on(
+    "value",
+    function(snap) {
+      const data = snap.val();
+      if (!data) {
+        productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
+        countEl.innerText = '0';
+        return;
+      }
+      products = Object.entries(data).map(function(entry) {
+        var key = entry[0];
+        var val = entry[1] || {};
+        return {
+          id: Number(key),
+          name: val.name || '',
+          quantity: Number(val.quantity || 0),
+          price: Number(val.price !== undefined ? val.price : (val.value !== undefined ? val.value : 0))
+        };
+      });
+      filtered = products.slice();
+      renderProducts();
+    },
+    function(error) {
+      // معالج الخطأ في حالة فشل الاستماع
+      productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
+      logEl.innerText = 'تفاصيل الخطأ: ' + (error.message || error);
+      console.error('خطأ في الاستماع:', error);
     }
+  );
+}
 
     // رندر المنتجات (لا توجد صور هنا)
     function renderProducts() {
