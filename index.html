@@ -143,6 +143,7 @@ function loadProducts() {
 
 // عرض المنتجات
 function renderProducts() {
+   id=Number(id);
   productsEl.innerHTML='';
   if(!filtered.length){
     productsEl.innerHTML='<div style="color:#6b7280">لا توجد نتائج</div>';
