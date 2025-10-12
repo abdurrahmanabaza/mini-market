@@ -194,6 +194,7 @@ loadProducts();
 
     function addToCart(id) {
        console.log('إضافة المنتج بالـ id:', id);
+      id = Number(id);
       var p = products.find(function(x) { return x.id === id; });
       console.log('المنتج:', p);
       if (!p) { alert('المنتج غير موجود'); return; }
