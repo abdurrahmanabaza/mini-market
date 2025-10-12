@@ -51,7 +51,7 @@
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
-<!-- قسم عرض معلومات المادة الخاصة -->
+<!-- قسم عرض معلومات المادة الخاصة (تمت إضافته) -->
 <div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
   <h4>معلومات المادة الخاصة</h4>
   <div>الوزن: <span id="specialWeight"></span></div>
@@ -123,15 +123,13 @@ const openUserFormBtn = document.getElementById('openUserForm');
 const userFormContainer = document.getElementById('userFormContainer');
 const userForm = document.getElementById('userForm');
 
-// بيانات
 let products = [];
 let filtered = [];
 let cart = [];
-let specialPrices = []; // لتخزين أسعار المادة ذات الـ id=0
+let specialPrices = [];
 
-// تحميل أسعار المادة ذات الـ id=0
+// تحميل أسعار المادة الخاصة
 function loadSpecialPrices() {
-  // جلب أسعار المادة ذات id=0
   db.ref('products/0/prices').once('value')
     .then(snap => {
       const data = snap.val();
@@ -141,66 +139,55 @@ function loadSpecialPrices() {
           price: Number(v.price || 0)
         }));
         if (specialPrices.length > 0) {
-          afficherخياراتالسعر();
+          populateSpecialPriceOptions();
         }
       }
     });
 }
 
-function afficherخياراتالسعر() {
-  const section = document.getElementById('specialPriceSection');
+function populateSpecialPriceOptions() {
   const select = document.getElementById('specialPriceSelect');
-  select.innerHTML = '';
-
+  select.innerHTML='';
   specialPrices.forEach((item, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.text = `وزن: ${item.weight} - السعر: ${item.price.toLocaleString()} ل.س`;
+    const option=document.createElement('option');
+    option.value=index;
+    option.text=`وزن: ${item.weight} - السعر: ${item.price.toLocaleString()} ل.س`;
     select.appendChild(option);
   });
-
-  // عرض القسم
-  document.getElementById('specialPriceSection').style.display = 'block';
-
-  // تحديث السعر المعروض عند التغيير
-  select.addEventListener('change', () => {
-    const selected = specialPrices[select.value];
-    document.getElementById('selectedPriceDisplay').innerText = selected.price.toLocaleString();
-  });
-
-  // تعيين القيمة المختارة افتراضياً
-  select.value = 0;
-  document.getElementById('selectedPriceDisplay').innerText = specialPrices[0].price.toLocaleString();
+  document.getElementById('specialPriceSection').style.display='block';
+  // عرض السعر عند التغيير
+  select.onchange=()=>{
+    const selected=specialPrices[select.value];
+    document.getElementById('selectedPriceDisplay').innerText=selected.price.toLocaleString();
+  };
+  // اختيار افتراضي
+  select.value=0;
+  document.getElementById('selectedPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
 }
 
-// تحميل المنتجات عند بداية التطبيق
+// تحميل المنتجات
 function loadProducts() {
   productsEl.innerHTML='جارٍ التحميل...';
   db.ref('products').once('value')
   .then(snap => {
-    const data = snap.val();
+    const data=snap.val();
     if(!data){
       productsEl.innerHTML='<div style="color:#6b7280">لا توجد منتجات</div>';
       countEl.innerText='0';
       return;
     }
-    products=Object.entries(data).map(([k,v]) => ({
-      id: Number(k),
-      name: v.name || '',
-      quantity: Number(v.quantity || 0),
-      price: Number(v.price !== undefined ? v.price : (v.value!==undefined?v.value:0)),
-      imageUrl: v.imageUrl || ''
+    products=Object.entries(data).map(([k,v])=>({
+      id:Number(k),
+      name:v.name||'',
+      quantity:Number(v.quantity||0),
+      price:Number(v.price!==undefined?v.price:(v.value!==undefined?v.value:0)),
+      imageUrl:v.imageUrl||''
     }));
     filtered=products.slice();
     renderProducts();
-  })
-  .catch(e => {
-    productsEl.innerHTML='<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
-    logEl.innerText='تفاصيل الخطأ: '+(e.message||e);
   });
 }
 
-// عرض المنتجات
 function renderProducts() {
   productsEl.innerHTML='';
   if(!filtered.length){
@@ -237,7 +224,6 @@ function renderProducts() {
 
 function escapeHtml(text){ return String(text||'').replace(/[&<>"'`=\/]/g,s=>'&#'+s.charCodeAt(0)+';'); }
 
-// أحداث المنتجات
 productsEl.addEventListener('click', e => {
   const btn=e.target.closest('button');
   if(!btn) return;
@@ -247,28 +233,24 @@ productsEl.addEventListener('click', e => {
   if(action==='details') showDetails(id);
 });
 
-// وظيفة إضافة للسلّة
 function addToCart(id){
   id=Number(id);
   const p=products.find(x=>x.id===id);
   if(!p){ alert('المنتج غير موجود'); return; }
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
 
-  if (id === 0) {
-    // المنتج الخاص: شراء بالسعر المختار
-    const select = document.getElementById('specialPriceSelect');
-    const selectedIndex = select.value;
-    const selected = specialPrices[selectedIndex];
-
-    // عرض معلومات المادة الخاصة
-    document.getElementById('specialWeight').innerText = selected.weight;
-    document.getElementById('specialPriceDisplay').innerText = selected.price.toLocaleString();
+  if(id===0){
+    // للمادة الخاصة
+    const select=document.getElementById('specialPriceSelect');
+    const selected=specialPrices[select.value];
+    // عرض المعلومات في القسم المخصص
+    document.getElementById('specialWeight').innerText=selected.weight;
+    document.getElementById('specialPriceDisplay').innerText=selected.price.toLocaleString();
     document.getElementById('specialInfoDisplay').style.display='block';
 
-    // إضافة إلى السلة
-    cart.push({id:0, name:'المادة الخاصة', weight: selected.weight, price: selected.price, qty:1});
+    // إضافة للسلة
+    cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
   } else {
-    // باقي المنتجات
     const existing=cart.find(c=>c.id===id);
     if(existing){
       if(existing.qty+1>p.quantity){ alert('تجاوزت الكمية المتاحة'); return; }
@@ -280,33 +262,26 @@ function addToCart(id){
   updateCartUI();
 }
 
-// عرض التفاصيل
 function showDetails(id){
   id=Number(id);
   const p=products.find(x=>x.id===id);
   if(!p) return alert('تفاصيل غير متاحة');
-  const details = p.detls !== undefined ? p.detls : 'لا توجد تفاصيل إضافية.';
-  alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity)+'\n'+details);
+  alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity));
 }
 
-// تحديث واجهة السلة
 function updateCartUI() {
   const totalItems=cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById('cartBtn').innerText='السلة ('+totalItems+')';
   renderCart();
-  // حفظ السلة في LocalStorage
   localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-// عرض/إخفاء السلة عند الضغط
 document.getElementById('cartBtn').addEventListener('click', () => {
   const panel=document.getElementById('cartPanel');
   panel.style.display=panel.style.display==='none'?'block':'none';
   renderCart();
-  panel.scrollIntoView({behavior:'smooth'});
 });
 
-// عرض محتوى السلة
 function renderCart() {
   const ul=document.getElementById('cartList');
   ul.innerHTML='';
@@ -334,7 +309,6 @@ function renderCart() {
   document.getElementById('cartTotal').innerText=total.toLocaleString();
 }
 
-// أحداث إدارة السلة
 document.getElementById('cartList').addEventListener('click', e => {
   const btn=e.target.closest('button');
   if(!btn) return;
@@ -363,33 +337,30 @@ function removeFromCart(id){
   updateCartUI();
 }
 
-// تفريغ السلة
 document.getElementById('clearCart').addEventListener('click', () => {
   if(!cart.length) return;
   if(confirm('هل تريد تفريغ السلة؟')) { cart=[]; updateCartUI(); }
 });
 
-// عند النقر على "أكمل الطلب"
 document.getElementById('startOrder').addEventListener('click', () => {
-  window.location.href='checkout.html'; // توجيه لصفحة إدخال البيانات
+  window.location.href='checkout.html';
 });
 
-// البحث
 searchEl.addEventListener('input', ()=> {
   const q=searchEl.value.trim().toLowerCase();
   filtered=products.filter(p=>p.name.toLowerCase().includes(q));
   renderProducts();
 });
 
-// إخفاء معلومات المادة الخاصة عند التمرير
+// عند التمرير، إخفاء المعلومات الخاصة
 window.addEventListener('scroll', () => {
-  const infoDiv = document.getElementById('specialInfoDisplay');
+  const infoDiv=document.getElementById('specialInfoDisplay');
   if(infoDiv.style.display==='block'){
     infoDiv.style.display='none';
   }
 });
 
-// تحميل البيانات عند البداية
+// تحميل البيانات
 loadProducts();
 loadSpecialPrices();
 
