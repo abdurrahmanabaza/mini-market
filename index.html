@@ -51,6 +51,13 @@
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
+<!-- قسم عرض معلومات المادة الخاصة -->
+<div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
+  <h4>معلومات المادة الخاصة</h4>
+  <div>الوزن: <span id="specialWeight"></span></div>
+  <div>السعر: <span id="specialPriceDisplay"></span> ل.س</div>
+</div>
+
 <main>
 <section id="products" class="grid">جارٍ التحميل...</section>
 
@@ -252,7 +259,13 @@ function addToCart(id){
     const select = document.getElementById('specialPriceSelect');
     const selectedIndex = select.value;
     const selected = specialPrices[selectedIndex];
-    if(!selected){ alert('يرجى اختيار السعر'); return; }
+
+    // عرض معلومات المادة الخاصة
+    document.getElementById('specialWeight').innerText = selected.weight;
+    document.getElementById('specialPriceDisplay').innerText = selected.price.toLocaleString();
+    document.getElementById('specialInfoDisplay').style.display='block';
+
+    // إضافة إلى السلة
     cart.push({id:0, name:'المادة الخاصة', weight: selected.weight, price: selected.price, qty:1});
   } else {
     // باقي المنتجات
@@ -368,7 +381,15 @@ searchEl.addEventListener('input', ()=> {
   renderProducts();
 });
 
-// تحميل البيانات
+// إخفاء معلومات المادة الخاصة عند التمرير
+window.addEventListener('scroll', () => {
+  const infoDiv = document.getElementById('specialInfoDisplay');
+  if(infoDiv.style.display==='block'){
+    infoDiv.style.display='none';
+  }
+});
+
+// تحميل البيانات عند البداية
 loadProducts();
 loadSpecialPrices();
 
