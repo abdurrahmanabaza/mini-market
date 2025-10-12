@@ -209,10 +209,12 @@ function showDetails(id){
   alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity));
 }
 
-function updateCartUI(){
+function updateCartUI() {
   const totalItems=cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById('cartBtn').innerText='السلة ('+totalItems+')';
   renderCart();
+  // حفظ السلة في LocalStorage
+  localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 document.getElementById('cartBtn').addEventListener('click', () => {
