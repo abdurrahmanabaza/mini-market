@@ -153,22 +153,32 @@
         }
 
         // دالة لإنشاء بطاقة المنتج
-        function createProductCard(product, productId) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.setAttribute('data-product-id', productId);
-            
-            card.innerHTML = 
-                ${product.image ? <img src="${product.image}" alt="${product.name}" class="product-image"> : ''}
-                <div class="product-name">${product.name || 'بدون اسم'}</div>
-                <div class="product-description">${product.description || 'لا يوجد وصف للمنتج'}</div>
-                <div class="product-price">${product.price ? $${product.price} : 'السعر غير متوفر'}</div>
-                ${product.category ? <div class="product-category">الفئة: ${product.category}</div> : ''}
-                ${product.stock !== undefined ? <div class="product-stock">${product.stock > 0 ? متوفر (${product.stock}) : 'غير متوفر'}</div> : ''}
-            ;
-            
-            return card;
-        }
+       function createProductCard(product, productId) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.setAttribute('data-product-id', productId);
+    
+    // إضافة صنف للمنتجات المميزة
+    const featuredClass = product.featured ? 'featured-product' : '';
+    card.classList.add(featuredClass);
+    
+    card.innerHTML = 
+        ${product.image ? <img src="${product.image}" alt="${product.name}" class="product-image"> : ''}
+        ${product.featured ? '<div class="featured-badge">مميز</div>' : ''}
+        <div class="product-name">${product.name || 'بدون اسم'}</div>
+        <div class="product-description">${product.description || 'لا يوجد وصف للمنتج'}</div>
+        <div class="product-price">${product.price ? $${product.price} : 'السعر غير متوفر'}</div>
+        ${product.rating ? <div class="product-rating">التقييم: ${product.rating} ⭐</div> : ''}
+        ${product.category ? <div class="product-category">الفئة: ${product.category}</div> : ''}
+        ${product.stock !== undefined ? 
+            <div class="product-stock ${product.stock === 0 ? 'out-of-stock' : product.stock < 5 ? 'low-stock' : ''}">
+                ${product.stock > 0 ? متوفر (${product.stock}) : 'غير متوفر'}
+            </div>
+         : ''}
+    ;
+    
+    return card;
+}
 
         // للاستماع للتحديثات الفورية
         function setupRealtimeListener() {
