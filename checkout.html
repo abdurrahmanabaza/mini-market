@@ -2,168 +2,323 @@
 <html lang="ar">
 <head>
   <meta charset="utf-8" />
-  <title>إتمام الطلب</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>المنتجات</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      direction: rtl;
-      background: #f5f7fb;
-      padding: 20px;
-      color: #0b1726;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    input, button {
+    body { font-family: Arial, Helvetica, sans-serif; direction: rtl; padding: 18px; background: #f5f7fb; color: #0b1726; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    input[type="search"] { padding: 8px; border-radius: 8px; border: 1px solid #d7dbe6; width: 260px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .card { background: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06); display: flex; flex-direction: column; gap: 8px; }
+    .title { font-weight: 700; }
+    .meta { display: flex; justify-content: space-between; align-items: center; color: #6b7280; font-size: 13px; }
+    .actions { display: flex; gap: 8px; margin-top: 8px; }
+    button { padding: 8px 10px; border-radius: 8px; border: 0; cursor: pointer; }
+    .btn-primary { background: #0f62fe; color: #fff; }
+    .btn-sec { background: #eef2ff; color: #0f62fe; }
+    #cartBtn { background: #06b6d4; color: #fff; border-radius: 8px; padding: 8px 10px; }
+    #log { margin-top: 12px; color: #b91c1c; }
+    /* تأثيرات الصور */
+    .product-image {
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
+      height: auto;
       border-radius: 8px;
-      border: 1px solid #d7dbe6;
-      font-size: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
-    button {
-      background: #0f62fe;
-      color: #fff;
-      border: none;
-      cursor: pointer;
+    .product-image:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-    .cart-summary {
-      margin-top: 20px;
-      background: #eef2ff;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    .cart-summary ul {
-      padding: 0;
-      list-style: none;
-    }
-    .cart-summary li {
-      margin-bottom: 6px;
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+      input[type="search"] { width: 100%; }
+      header { flex-direction: column; align-items: flex-start; }
+      #cartPanel { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>إتمام الطلب</h2>
-    <form id="userDataForm">
-      <input type="text" id="userName" placeholder="الاسم الكامل" required />
-      <input type="text" id="userAddress" placeholder="العنوان" required />
-      <input type="tel" id="userPhone" placeholder="رقم الهاتف" required />
-      <button type="submit">إرسال الطلب</button>
-    </form>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1 style="margin:0">سوق بئرعجم للمنتجات المحلية</h1>
+        <div style="color:#6b7280;font-size:13px">مرحباً بك</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="count" style="background:#eef2ff;padding:6px 8px;border-radius:8px">--</div>
+        <input id="search" type="search" placeholder="ابحث باسم المنتج..." />
+        <button id="cartBtn">السلة (0)</button>
+      </div>
+    </header>
 
-    <div class="cart-summary" id="cartSummary" style="display:none">
-      <h3>محتوى السلة</h3>
-      <ul id="cartItems"></ul>
-      <div><strong>الإجمالي:</strong> <span id="cartTotal">0</span> ل.س</div>
-    </div>
+    <main>
+      <section id="products" class="grid">جارٍ التحميل...</section>
+
+      <section id="cartPanel" style="display:none;margin-top:14px">
+        <h3>السلة</h3>
+        <ul id="cartList" style="padding:0;margin:0;list-style:none"></ul>
+        <div style="margin-top:10px;font-weight:700">الإجمالي: <span id="cartTotal">0</span> ل.س</div>
+        <div style="margin-top:8px">
+          <button id="clearCart" class="btn-sec">تفريغ السلة</button>
+          <button id="checkout" class="btn-primary">تأكيد الطلب</button>
+        </div>
+      </section>
+
+      <div id="log"></div>
+    </main>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDKs (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // إعدادات Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
-      authDomain: "local-products-82f7d.firebaseapp.com",
-      databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
-      projectId: "local-products-82f7d",
-      storageBucket: "local-products-82f7d.appspot.com",
-      messagingSenderId: "92892216531",
-      appId: "1:92892216531:web:b39013834c0215eaf2e826"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDqUZQR3O5Ux3nyWsbgdnlQxcAU7qKXrKU",
+    authDomain: "local-products-82f7d.firebaseapp.com",
+    databaseURL: "https://local-products-82f7d-default-rtdb.firebaseio.com",
+    projectId: "local-products-82f7d",
+    storageBucket: "local-products-82f7d.firebasestorage.app",
+    messagingSenderId: "92892216531",
+    webId: "1:92892216531:web:b39013834c0215eaf2e826"
+  };
+  // تهيئة Firebase
+  try {
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  } catch (e) {
+    document.getElementById('log').innerText = 'خطأ في تهيئة Firebase: ' + e.message;
+  }
+  const db = firebase.database();
 
-    // عناصر DOM
-    const userNameInput = document.getElementById('userName');
-    const userAddressInput = document.getElementById('userAddress');
-    const userPhoneInput = document.getElementById('userPhone');
-    const form = document.getElementById('userDataForm');
-    const cartSummaryDiv = document.getElementById('cartSummary');
-    const cartItemsUl = document.getElementById('cartItems');
-    const cartTotalSpan = document.getElementById('cartTotal');
+  // عناصر DOM
+  const productsEl = document.getElementById('products');
+  const countEl = document.getElementById('count');
+  const searchEl = document.getElementById('search');
+  const cartBtn = document.getElementById('cartBtn');
+  const cartPanel = document.getElementById('cartPanel');
+  const cartList = document.getElementById('cartList');
+  const cartTotal = document.getElementById('cartTotal');
+  const clearCart = document.getElementById('clearCart');
+  const checkout = document.getElementById('checkout');
+  const logEl = document.getElementById('log');
 
-    // عند تحميل الصفحة
-    window.addEventListener('DOMContentLoaded', () => {
-      // استرجاع البيانات من LocalStorage إذا كانت موجودة
-      const saved = localStorage.getItem('userData');
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data.name) document.getElementById('userName').value = data.name;
-        if (data.address) document.getElementById('userAddress').value = data.address;
-        if (data.phone) document.getElementById('userPhone').value = data.phone;
-      }
-      // استرجاع السلة من LocalStorage
-      const cart = JSON.parse(localStorage.getItem('cart')  '[]');
-      if (cart.length) {
-        let total = 0;
-        cart.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = `${item.name} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} ل.س`;
-          cartItemsUl.appendChild(li);
-          total += item.price * item.qty;
+  // بيانات محلية
+  let products = []; // [{id, name, quantity, price, imageUrl}]
+  let filtered = [];
+  let cart = [];     // [{id, name, price, qty, max}]
+
+  // تحميل البيانات من قاعدة Firebase
+  function loadProducts() {
+    productsEl.innerHTML = 'جارٍ التحميل...';
+    db.ref('products').once('value')
+      .then(function(snap) {
+        const data = snap.val();
+        if (!data) {
+          productsEl.innerHTML = '<div style="color:#6b7280">لا توجد منتجات في القاعدة</div>';
+          countEl.innerText = '0';
+          return;
+        }
+        products = Object.entries(data).map(function(entry) {
+          var key = entry[0];
+          var val = entry[1] || {};
+          return {
+            id: Number(key),
+            name: val.name || '',
+            quantity: Number(val.quantity || 0),
+            price: Number(val.price !== undefined ? val.price : (val.value !== undefined ? val.value : 0)),
+            imageUrl: val.imageUrl || '' // تأكد من وجود هذا الحقل في بياناتك
+          };
         });
-        document.getElementById('cartSummary').style.display = 'block';
-        cartTotalSpan.textContent = total.toFixed(2);
-      }
+        filtered = products.slice();
+        renderProducts();
+      })
+      .catch(function(error) {
+        productsEl.innerHTML = '<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
+        logEl.innerText = 'تفاصيل الخطأ: ' + (error.message || error);
+      });
+  }
+
+  // عرض المنتجات مع الصور
+  function renderProducts() {
+    productsEl.innerHTML = '';
+    if (!filtered.length) {
+      productsEl.innerHTML = '<div style="color:#6b7280">لا توجد نتائج</div>';
+      countEl.innerText = '0';
+      return;
+    }
+    countEl.innerText = String(filtered.length);
+    filtered.forEach(function(p) {
+      var nameSafe = escapeHtml(p.name);
+      var priceStr = Number(p.price).toLocaleString();
+      var qtyStr = String(Number(p.quantity));
+      
+      // صورة المنتج مع تحقق
+      var imgSrc = p.imageUrl ? p.imageUrl : 'https://via.placeholder.com/240x180?text=لا+صور'; // صورة افتراضية
+      var imgStyle = `
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+      `;
+      var imgHoverStyle = `
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      `;
+
+      var cardHTML = `
+        <div class="card">
+          <img src="${imgSrc}" style="${imgStyle}" onmouseover="this.style.cssText='${imgStyle}${imgHoverStyle}'" onmouseout="this.style.cssText='${imgStyle}'" />
+          <div class="title">${nameSafe}</div>
+          <div class="meta">
+            <div>السعر: <strong>${priceStr}</strong> ل.س</div>
+            <div>الكمية: <span>${qtyStr}</span></div>
+          </div>
+          <div class="actions">
+            <button class="btn-sec" data-action="details" data-id="${p.id}">تفاصيل</button>
+            <button class="btn-primary" data-action="add" data-id="${p.id}">أضف للسلة</button>
+          </div>
+        </div>
+      `;
+      var card = document.createElement('div');
+      card.innerHTML = cardHTML;
+      productsEl.appendChild(card);
     });
+  }
 
-    // عند تقديم النموذج
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = userNameInput.value.trim();
-      const address = userAddressInput.value.trim();
-      const phone = userPhoneInput.value.trim();
+  // تأمين النصوص
+  function escapeHtml(text) {
+    return String(text || '').replace(/[&<>"'`=\/]/g, function(s) { return '&#' + s.charCodeAt(0) + ';'; });
+  }
 
-      if (!name  !address  !phone) {
-        alert('يرجى ملء جميع البيانات');
-        return;
-      }
+  // أحداث المنتجات
+  productsEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var action = btn.getAttribute('data-action');
+    var id = btn.getAttribute('data-id');
+    if (action === 'add') addToCart(id);
+    if (action === 'details') showDetails(id);
+  });
 
-      // حفظ البيانات في LocalStorage
-      localStorage.setItem('userData', JSON.stringify({ name, address, phone }));
+  function addToCart(id) {
+    id = Number(id);
+    var p = products.find(function(x) { return x.id === id; });
+    if (!p) { alert('المنتج غير موجود'); return; }
+    if (p.quantity <= 0) { alert('الكمية غير متاحة'); return; }
+    var existing = cart.find(function(c) { return c.id === id; });
+    if (existing) {
+      if (existing.qty + 1 > p.quantity) { alert('تجاوزت الكمية المتاحة'); return; }
+      existing.qty++;
+    } else {
+      cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, max: p.quantity });
+    }
+    updateCartUI();
+  }
 
-      // استرجاع السلة من LocalStorage
-      const cart = JSON.parse(localStorage.getItem('cart')  '[]');
-      if (cart.length === 0) {
-        alert('السلة فارغة');
-        return;
-      }
+  function showDetails(id) {
+    var p = products.find(function(x) { return x.id === id; });
+    if (!p) return alert('تفاصيل غير متاحة');
+    alert(p.name + '\nالسعر: ' + Number(p.price).toLocaleString() + ' ل.س\nالكمية المتاحة: ' + Number(p.quantity));
+  }
 
-      // إعداد البيانات لإرسالها
-      const newOrder = {
-        user: { name, address, phone },
-        cart: cart,
-        total: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      };
+  function updateCartUI() {
+    var totalItems = cart.reduce(function(s, i) { return s + i.qty; }, 0);
+    cartBtn.innerText = 'السلة (' + totalItems + ')';
+    renderCart();
+  }
 
-      // إرسال الطلب إلى Firebase
-      db.ref('userOrders').push(newOrder)
-        .then(() => {
-          alert('تم إرسال الطلب بنجاح!');
-          // يمكن إضافة إعادة توجيه إلى الصفحة الرئيسية أو صفحة الشكر
-          window.location.href = 'index.html'; // استبدلها إذا لزم الأمر
-        })
-        .catch((err) => {
-          alert('حدث خطأ أثناء الإرسال: ' + err.message);
-        });
+  cartBtn.addEventListener('click', function() {
+    cartPanel.style.display = cartPanel.style.display === 'none' ? 'block' : 'none';
+    renderCart();
+    cartPanel.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function renderCart() {
+    cartList.innerHTML = '';
+    if (!cart.length) {
+      cartList.innerHTML = '<li style="color:#6b7280">السلة فارغة</li>';
+      cartTotal.innerText = '0';
+      return;
+    }
+    var total = 0;
+    cart.forEach(function(item) {
+      total += item.price * item.qty;
+      var li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.justifyContent = 'space-between';
+      li.style.alignItems = 'center';
+      li.style.padding = '6px 0';
+      li.innerHTML = `
+        <div>${escapeHtml(item.name)}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button data-id="${item.id}" data-op="minus" class="btn-sec">-</button>
+          <div>${item.qty}</div>
+          <button data-id="${item.id}" data-op="plus" class="btn-primary">+</button>
+          <div style="min-width:100px;text-align:right">${(Number(item.price * item.qty)).toLocaleString()} ل.س</div>
+          <button data-id="${item.id}" data-op="remove" class="btn-sec">حذف</button>
+        </div>
+      `;
+      cartList.appendChild(li);
     });
+    cartTotal.innerText = total.toLocaleString();
+  }
+
+  // أحداث سلة التسوق
+  cartList.addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var op = btn.getAttribute('data-op');
+    if (op === 'plus') changeQty(id, 1);
+    if (op === 'minus') changeQty(id, -1);
+    if (op === 'remove') removeFromCart(id);
+  });
+
+  function changeQty(id, delta) {
+    id = Number(id);
+    var it = cart.find(function(c) { return c.id === id; });
+    if (!it) return;
+    var prod = products.find(function(p) { return p.id === id; });
+    var newQty = it.qty + delta;
+    if (newQty <= 0) return;
+    if (newQty > (prod ? prod.quantity : it.max)) { alert('تجاوزت الكمية المتاحة'); return; }
+    it.qty = newQty;
+    updateCartUI();
+  }
+
+  function removeFromCart(id) {
+    id = Number(id);
+    cart = cart.filter(function(c) { return c.id !== id; });
+    updateCartUI();
+  }
+
+  // تفريغ السلة
+  clearCart.addEventListener('click', function() {
+    if (!cart.length) return;
+    if (confirm('هل تريد تفريغ السلة؟')) { cart = []; updateCartUI(); }
+  });
+
+  // تأكيد الطلب
+  checkout.addEventListener('click', function() {
+    if (!cart.length) return alert('السلة فارغة');
+    var order = { items: cart.map(function(i) { return { id: i.id, name: i.name, price: i.price, qty: i.qty }; }), createdAt: Date.now() };
+    db.ref('orders').push(order)
+      .then(function() { alert('تم تسجيل الطلب'); cart = []; updateCartUI(); })
+      .catch(function(err) { console.error(err); alert('فشل إرسال الطلب'); });
+  });
+
+  // البحث
+  searchEl.addEventListener('input', function() {
+    var q = searchEl.value.trim().toLowerCase();
+    filtered = products.filter(function(p) { return p.name.toLowerCase().includes(q); });
+    renderProducts();
+  });
+
+  // تحميل البيانات عند البداية
+  loadProducts();
   </script>
 </body>
 </html>
