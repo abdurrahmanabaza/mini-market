@@ -107,7 +107,7 @@
         let total = 0;
         cart.forEach(item => {
           const li = document.createElement('li');
-          li.textContent = ${item.name} × ${item.qty} = ${item.price * item.qty} ل.س;
+          li.textContent = `${item.name} × ${item.qty} = ${item.price * item.qty} ل.س`;
           cartItems.appendChild(li);
           total += item.price * item.qty;
         });
@@ -148,4 +148,5 @@ const address = document.getElementById('userAddress').value.trim();
     });
   </script>
 </body>
+
 </html>
