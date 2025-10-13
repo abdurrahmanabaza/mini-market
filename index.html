@@ -150,9 +150,12 @@ function populateSpecialPriceOptions() {
   select.onchange=()=>{
     const selected=specialPrices[select.value];
     document.getElementById('selectedPriceDisplay').innerText=selected.price.toLocaleString();
+    // تحديث الوزن عند التغيير
+    document.getElementById('specialWeight').innerText=specialPrices[select.value].weight;
   };
   select.value=0;
   document.getElementById('selectedPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+  document.getElementById('specialWeight').innerText=specialPrices[0].weight;
 }
 
 function loadProducts() {
@@ -244,18 +247,13 @@ function addToCart(id){
     select.value=0;
     document.getElementById('specialWeight').innerText=specialPrices[0].weight;
     document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
-    // طلب تأكيد
-    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')){
-      const selectedIndex=select.value;
-      const selected=specialPrices[selectedIndex];
-      cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
-      // إخفاء القسم بعد الإضافة
-      document.getElementById('specialPriceSection').style.display='none';
-    } else {
-      // إخفاء القسم إذا لم يؤكد
-      document.getElementById('specialPriceSection').style.display='none';
-      return;
-    }
+
+    // هنا نطلب تأكيد بعد اختيار السعر
+    // نضيف مستمع للزر أو ننتظر حدث معين
+    // لكن هنا نضيف بشكل مباشر عند الضغط
+    // سنضيف وظيفة خاصة
+    // نستخدم متغير للتحكم
+    handleSpecialProductAdd(p);
   } else {
     const existing=cart.find(c=>c.id===id);
     if(existing){
@@ -264,21 +262,41 @@ function addToCart(id){
     }else{
       cart.push({id:p.id, name:p.name, price:p.price, qty:1, max:p.quantity});
     }
+    updateCartUI();
   }
-  updateCartUI();
 }
 
-// عند الضغط على زر السلة، يظهر ويذهب للأسفل
-document.getElementById('cartBtn').addEventListener('click', () => {
-  const panel=document.getElementById('cartPanel');
-  if(panel.style.display==='none') {
-    panel.style.display='block';
-    renderCart();
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  } else {
-    panel.style.display='none';
-  }
-});
+// وظيفة لإدارة إضافة المادة الخاصة بعد اختيار السعر
+function handleSpecialProductAdd(product) {
+  // عند الضغط على أضف للسلة للمادة الخاصة، نستخدم تأكيد
+  // هنا نضيف وظيفة مخصصة
+  // ننتظر الضغط على زر "إضافة" بعد اختيار السعر
+  // يمكننا أن نضيف مستمعًا مؤقتًا
+  const select = document.getElementById('specialPriceSelect');
+  const btnAddSpecial = document.createElement('button');
+  btnAddSpecial.innerText='تأكيد الإضافة';
+  btnAddSpecial.className='btn-primary';
+  document.getElementById('specialPriceSection').appendChild(btnAddSpecial);
+
+  btnAddSpecial.onclick=()=>{
+    const selectedIndex=select.value;
+    const selected=specialPrices[selectedIndex];
+    // سؤال التأكيد النهائي
+    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')){
+      // إضافة إلى السلة
+      cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
+      // إخفاء قسم المادة الخاصة
+      document.getElementById('specialPriceSection').style.display='none';
+      // إزالة زر التأكيد
+      btnAddSpecial.remove();
+      updateCartUI();
+    } else {
+      // إلغاء
+      // إزالة زر التأكيد
+      btnAddSpecial.remove();
+    }
+  };
+}
 
 function showDetails(id){
   id=Number(id);
