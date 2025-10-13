@@ -143,6 +143,7 @@ function loadProducts() {
 
 // عرض المنتجات
 function renderProducts() {
+   id=Number(id);
   productsEl.innerHTML='';
   if(!filtered.length){
     productsEl.innerHTML='<div style="color:#6b7280">لا توجد نتائج</div>';
@@ -204,7 +205,6 @@ function addToCart(id){
 }
 
 function showDetails(id){
-  id=Number(id);
   const p=products.find(x=>x.id===id);
   if(!p) return alert('تفاصيل غير متاحة');
   alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity));
