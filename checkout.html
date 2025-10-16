@@ -61,7 +61,7 @@
       <input type="text" id="userName" placeholder="الاسم الكامل" required />
       <input type="text" id="userAddress" placeholder="العنوان" required />
       <input type="tel" id="userPhone" placeholder="رقم الهاتف" required />
-      <button type="submit">إرسال الطلب</button>
+      <button type="submit" id="submitOrder">إرسال الطلب</button>
     </form>
 
     <div class="cart-summary" id="cartSummary" style="display:none">
@@ -163,7 +163,19 @@
         .then(() => {
           // تحديث الكميات في قاعدة بيانات المنتجات
 cart.forEach(item => {
+  if (item.name === "جبنة شركسية") {
+    // حذف الخيار المطلوب من prices حسب الوزن والسعر
+    const pricesRef = db.ref('products/' + item.id + '/prices');
+    pricesRef.once('value').then(snapshot => {
+      const prices = snapshot.val();
+      if (!Array.isArray(prices)) return;
 
+      const index = prices.findIndex(p => p && p.price === item.price && p.weight === item.weight);
+      if (index !== -1) {
+        db.ref('products/' + item.id + '/prices/' + index).remove();
+      }
+    });
+  } else {
     // خصم الكمية من باقي المنتجات
     const productRef = db.ref('products/' + item.id + '/quantity');
     productRef.transaction(currentQty => {
@@ -171,7 +183,7 @@ cart.forEach(item => {
       const newQty = currentQty - item.qty;
       return newQty >= 0 ? newQty : currentQty;
     });
-  
+  }
 });
           alert('تم إرسال الطلب بنجاح!');
           // يمكن إضافة إعادة توجيه إلى الصفحة الرئيسية أو صفحة الشكر
@@ -186,6 +198,7 @@ cart.forEach(item => {
   </script>
 </body>
 </html>
+
 
 
 
