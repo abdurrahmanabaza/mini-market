@@ -163,7 +163,7 @@ cart.forEach(item => {
   const productRef = db.ref('products/' + item.id + '/quantity');
   productRef.transaction(currentQty => {
     if (currentQty === null) return 0; // المنتج غير موجود
-    const newQty = currentQty - item.quantity;
+    const newQty = currentQty - item.qty;
     return newQty >= 0 ? newQty : 0; // لا تسمح بالسالب
   });
 });
@@ -178,6 +178,7 @@ cart.forEach(item => {
   </script>
 </body>
 </html>
+
 
 
 
