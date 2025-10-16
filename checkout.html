@@ -151,7 +151,8 @@
         user: { name, address, phone },
         cart: cart,
         total: cart.reduce((sum, item) => sum + item.price * item.qty, 0),
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        status: 'pending'
       };
 
       // إرسال الطلب إلى Firebase
@@ -168,3 +169,4 @@
   </script>
 </body>
 </html>
+
