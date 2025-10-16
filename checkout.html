@@ -108,8 +108,9 @@
         if (data.address) document.getElementById('userAddress').value = data.address;
         if (data.phone) document.getElementById('userPhone').value = data.phone;
       }
+
       // استرجاع السلة من LocalStorage
-      const cart = JSON.parse(localStorage.getItem('cart')  '[]');
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       if (cart.length) {
         let total = 0;
         cart.forEach(item => {
@@ -130,7 +131,7 @@
       const address = userAddressInput.value.trim();
       const phone = userPhoneInput.value.trim();
 
-      if (!name  !address  !phone) {
+      if (!name || !address || !phone) {
         alert('يرجى ملء جميع البيانات');
         return;
       }
@@ -139,7 +140,7 @@
       localStorage.setItem('userData', JSON.stringify({ name, address, phone }));
 
       // استرجاع السلة من LocalStorage
-      const cart = JSON.parse(localStorage.getItem('cart')  '[]');
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       if (cart.length === 0) {
         alert('السلة فارغة');
         return;
@@ -167,5 +168,3 @@
   </script>
 </body>
 </html>
-
-
