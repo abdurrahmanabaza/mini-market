@@ -154,7 +154,10 @@
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         status: 'pending'
       };
-
+      const submitBtn = document.getElementById('submitOrder');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري إرسال الطلب...';
+      
       // إرسال الطلب إلى Firebase
       db.ref('userOrders').push(newOrder)
         .then(() => {
@@ -187,12 +190,15 @@ cart.forEach(item => {
           window.location.href = 'index.html'; // استبدلها إذا لزم الأمر
         })
         .catch((err) => {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'إرسال الطلب';
           alert('حدث خطأ أثناء الإرسال: ' + err.message);
         });
     });
   </script>
 </body>
 </html>
+
 
 
 
