@@ -20,7 +20,7 @@
   #cartBtn { background:#06b6d4; color:#fff; border-radius:8px; padding:8px 10px; }
   #log { margin-top:12px; color:#b91c1c; }
   /* تأثيرات الصور */
-  .product-image { width:40px; height:auto; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); transition:transform 0.3s, box-shadow 0.3s; }
+  .product-image { width:80px; height:auto; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); transition:transform 0.3s, box-shadow 0.3s; }
   .product-image:hover { transform:scale(1.02); box-shadow:0 8px 16px rgba(0,0,0,0.2); }
   @media(max-width:768px){
     .grid { grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); }
@@ -43,6 +43,20 @@
     <button id="cartBtn">السلة (0)</button>
   </div>
 </header>
+
+<!-- قسم المادة الخاصة مخفي افتراضياً -->
+<div id="specialPriceSection" style="margin-top:20px; display:none; border:1px solid #ccc; padding:10px; border-radius:8px;">
+  <h3>اختر السعر للمادة الخاصة</h3>
+  <select id="specialPriceSelect"></select>
+  <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
+</div>
+
+<!-- قسم عرض معلومات المادة الخاصة مخفي -->
+<div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
+  <h4>معلومات المادة الخاصة</h4>
+  <div>الوزن: <span id="specialWeight"></span></div>
+  <div>السعر: <span id="specialPriceDisplay"></span> ل.س</div>
+</div>
 
 <main>
 <section id="products" class="grid">جارٍ التحميل...</section>
@@ -77,7 +91,7 @@
 </main>
 </div>
 
-<!-- Firebase SDKs (compat) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -94,7 +108,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// عناصر DOM
 const productsEl = document.getElementById('products');
 const countEl = document.getElementById('count');
 const searchEl = document.getElementById('search');
@@ -102,46 +115,68 @@ const cartBtn = document.getElementById('cartBtn');
 const cartPanel = document.getElementById('cartPanel');
 const cartList = document.getElementById('cartList');
 const cartTotal = document.getElementById('cartTotal');
-const clearCart = document.getElementById('clearCart');
-const startOrderBtn = document.getElementById('startOrder');
-const logEl = document.getElementById('log');
-const openUserFormBtn = document.getElementById('openUserForm');
-const userFormContainer = document.getElementById('userFormContainer');
-const userForm = document.getElementById('userForm');
 
-// بيانات
 let products = [];
 let filtered = [];
 let cart = [];
+let specialPrices = [];
 
-// تحميل المنتجات
+function loadSpecialPrices() {
+  db.ref('products/0/prices').once('value')
+    .then(snap => {
+      const data = snap.val();
+      if (data) {
+        specialPrices = Object.entries(data).map(([k,v]) => ({
+          weight: v.weight || '',
+          price: Number(v.price || 0)
+        }));
+        if (specialPrices.length > 0) {
+          populateSpecialPriceOptions();
+        }
+      }
+    });
+}
+
+function populateSpecialPriceOptions() {
+  const select = document.getElementById('specialPriceSelect');
+  select.innerHTML='';
+  specialPrices.forEach((item, index) => {
+    const option=document.createElement('option');
+    option.value=index;
+    option.text=`وزن: ${item.weight} - السعر: ${item.price.toLocaleString()} ل.س`;
+    select.appendChild(option);
+  });
+  document.getElementById('specialPriceSection').style.display='block';
+  select.onchange=()=>{
+    const selected=specialPrices[select.value];
+    document.getElementById('selectedPriceDisplay').innerText=selected.price.toLocaleString();
+  };
+  select.value=0;
+  document.getElementById('selectedPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+}
+
 function loadProducts() {
   productsEl.innerHTML='جارٍ التحميل...';
   db.ref('products').once('value')
   .then(snap => {
-    const data = snap.val();
+    const data=snap.val();
     if(!data){
       productsEl.innerHTML='<div style="color:#6b7280">لا توجد منتجات</div>';
       countEl.innerText='0';
       return;
     }
-    products=Object.entries(data).map(([k,v]) => ({
-      id: Number(k),
-      name: v.name || '',
-      quantity: Number(v.quantity || 0),
-      price: Number(v.price !== undefined ? v.price : (v.value!==undefined?v.value:0)),
-      imageUrl: v.imageUrl || ''
+    products=Object.entries(data).map(([k,v])=>({
+      id:Number(k),
+      name:v.name||'',
+      quantity:Number(v.quantity||0),
+      price:Number(v.price!==undefined?v.price:(v.value!==undefined?v.value:0)),
+      imageUrl:v.imageUrl||''
     }));
     filtered=products.slice();
     renderProducts();
-  })
-  .catch(e => {
-    productsEl.innerHTML='<div style="color:#b91c1c">فشل تحميل المنتجات</div>';
-    logEl.innerText='تفاصيل الخطأ: '+(e.message||e);
   });
 }
 
-// عرض المنتجات
 function renderProducts() {
   productsEl.innerHTML='';
   if(!filtered.length){
@@ -178,7 +213,6 @@ function renderProducts() {
 
 function escapeHtml(text){ return String(text||'').replace(/[&<>"'`=\/]/g,s=>'&#'+s.charCodeAt(0)+';'); }
 
-// أحداث المنتجات
 productsEl.addEventListener('click', e => {
   const btn=e.target.closest('button');
   if(!btn) return;
@@ -193,18 +227,61 @@ function addToCart(id){
   const p=products.find(x=>x.id===id);
   if(!p){ alert('المنتج غير موجود'); return; }
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
-  const existing=cart.find(c=>c.id===id);
-  if(existing){
-    if(existing.qty+1>p.quantity){ alert('تجاوزت الكمية المتاحة'); return; }
-    existing.qty++;
-  }else{
-    cart.push({id:p.id, name:p.name, price:p.price, qty:1, max:p.quantity});
+
+  if(id===0){
+    // إظهار قسم المادة الخاصة
+    document.getElementById('specialPriceSection').style.display='block';
+    const select=document.getElementById('specialPriceSelect');
+    select.innerHTML=''; // تفريغ الخيارات
+    // تعبئة الخيارات
+    specialPrices.forEach((item, index) => {
+      const option=document.createElement('option');
+      option.value=index;
+      option.text=`وزن: ${item.weight} - السعر: ${item.price.toLocaleString()} ل.س`;
+      select.appendChild(option);
+    });
+    // اختيار أول خيار بشكل افتراضي
+    select.value=0;
+    document.getElementById('specialWeight').innerText=specialPrices[0].weight;
+    document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+    // طلب تأكيد
+    if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')){
+      const selectedIndex=select.value;
+      const selected=specialPrices[selectedIndex];
+      cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
+      // إخفاء القسم بعد الإضافة
+      document.getElementById('specialPriceSection').style.display='none';
+    } else {
+      // إخفاء القسم إذا لم يؤكد
+      document.getElementById('specialPriceSection').style.display='none';
+      return;
+    }
+  } else {
+    const existing=cart.find(c=>c.id===id);
+    if(existing){
+      if(existing.qty+1>p.quantity){ alert('تجاوزت الكمية المتاحة'); return; }
+      existing.qty++;
+    }else{
+      cart.push({id:p.id, name:p.name, price:p.price, qty:1, max:p.quantity});
+    }
   }
   updateCartUI();
 }
 
+// عند الضغط على زر السلة، يظهر ويذهب للأسفل
+document.getElementById('cartBtn').addEventListener('click', () => {
+  const panel=document.getElementById('cartPanel');
+  if(panel.style.display==='none') {
+    panel.style.display='block';
+    renderCart();
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  } else {
+    panel.style.display='none';
+  }
+});
+
 function showDetails(id){
-    id=Number(id);
+  id=Number(id);
   const p=products.find(x=>x.id===id);
   if(!p) return alert('تفاصيل غير متاحة');
   alert(p.name+'\nالسعر: '+Number(p.price).toLocaleString()+' ل.س\nالكمية المتاحة: '+Number(p.quantity));
@@ -214,16 +291,8 @@ function updateCartUI() {
   const totalItems=cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById('cartBtn').innerText='السلة ('+totalItems+')';
   renderCart();
-  // حفظ السلة في LocalStorage
   localStorage.setItem('cart', JSON.stringify(cart));
 }
-
-document.getElementById('cartBtn').addEventListener('click', () => {
-  const panel=document.getElementById('cartPanel');
-  panel.style.display=panel.style.display==='none'?'block':'none';
-  renderCart();
-  panel.scrollIntoView({behavior:'smooth'});
-});
 
 function renderCart() {
   const ul=document.getElementById('cartList');
@@ -252,7 +321,6 @@ function renderCart() {
   document.getElementById('cartTotal').innerText=total.toLocaleString();
 }
 
-// أحداث سلة التسوق
 document.getElementById('cartList').addEventListener('click', e => {
   const btn=e.target.closest('button');
   if(!btn) return;
@@ -281,25 +349,32 @@ function removeFromCart(id){
   updateCartUI();
 }
 
-// تفريغ السلة
 document.getElementById('clearCart').addEventListener('click', () => {
   if(!cart.length) return;
   if(confirm('هل تريد تفريغ السلة؟')) { cart=[]; updateCartUI(); }
 });
 
-// عند النقر على "أكمل الطلب" يفتح صفحة إدخال البيانات
 document.getElementById('startOrder').addEventListener('click', () => {
-  window.location.href='checkout.html'; // توجه لصفحة إدخال المعلومات
+  window.location.href='checkout.html';
 });
 
-// البحث
 searchEl.addEventListener('input', ()=> {
   const q=searchEl.value.trim().toLowerCase();
   filtered=products.filter(p=>p.name.toLowerCase().includes(q));
   renderProducts();
 });
 
+// عند التمرير، إخفاء المعلومات الخاصة
+window.addEventListener('scroll', () => {
+  const infoDiv=document.getElementById('specialInfoDisplay');
+  if(infoDiv.style.display==='block'){
+    infoDiv.style.display='none';
+  }
+});
+
+// تحميل البيانات
 loadProducts();
+loadSpecialPrices();
 
 </script>
 </body>
