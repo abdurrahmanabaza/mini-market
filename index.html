@@ -44,14 +44,14 @@
   </div>
 </header>
 
-<!-- قسم المادة الخاصة مخفي افتراضياً -->
+<!-- قسم المادة الخاصة مخفي بشكل افتراضي -->
 <div id="specialPriceSection" style="margin-top:20px; display:none; border:1px solid #ccc; padding:10px; border-radius:8px;">
   <h3>اختر السعر للمادة الخاصة</h3>
   <select id="specialPriceSelect"></select>
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
 </div>
 
-<!-- قسم عرض معلومات المادة الخاصة مخفي -->
+<!-- قسم عرض معلومات المادة الخاصة مخفي بشكل افتراضي -->
 <div id="specialInfoDisplay" style="display:none; position:fixed; top:20px; right:20px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:999;">
   <h4>معلومات المادة الخاصة</h4>
   <div>الوزن: <span id="specialWeight"></span></div>
@@ -242,17 +242,21 @@ function addToCart(id){
     });
     // اختيار أول خيار بشكل افتراضي
     select.value=0;
+    document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+    // عرض المعلومات
     document.getElementById('specialWeight').innerText=specialPrices[0].weight;
     document.getElementById('specialPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
+
     // طلب تأكيد
     if(confirm('هل أنت متأكد أنك تريد إضافة المادة الخاصة؟')){
       const selectedIndex=select.value;
       const selected=specialPrices[selectedIndex];
       cart.push({id:0, name:'المادة الخاصة', weight:selected.weight, price:selected.price, qty:1});
-      // إخفاء القسم بعد الإضافة
+      // إخفاء القسم بعد التأكيد والإضافة
       document.getElementById('specialPriceSection').style.display='none';
     } else {
-      // إخفاء القسم إذا لم يؤكد
+      // إلغاء الإضافة
+      // إخفاء القسم
       document.getElementById('specialPriceSection').style.display='none';
       return;
     }
@@ -268,15 +272,13 @@ function addToCart(id){
   updateCartUI();
 }
 
-// عند الضغط على زر السلة، يظهر ويذهب للأسفل
+// عند الضغط على زر السلة، يظهر ويشغل تمرير لأسفل
 document.getElementById('cartBtn').addEventListener('click', () => {
   const panel=document.getElementById('cartPanel');
-  if(panel.style.display==='none') {
-    panel.style.display='block';
-    renderCart();
+  panel.style.display=panel.style.display==='none'?'block':'none';
+  renderCart();
+  if(panel.style.display==='block'){
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  } else {
-    panel.style.display='none';
   }
 });
 
