@@ -158,6 +158,15 @@
       // إرسال الطلب إلى Firebase
       db.ref('userOrders').push(newOrder)
         .then(() => {
+          // تحديث الكميات في قاعدة بيانات المنتجات
+cart.forEach(item => {
+  const productRef = db.ref('products/' + item.name + '/qty');
+  productRef.transaction(currentQty => {
+    if (currentQty === null) return 0; // المنتج غير موجود
+    const newQty = currentQty - item.qty;
+    return newQty >= 0 ? newQty : 0; // لا تسمح بالسالب
+  });
+});
           alert('تم إرسال الطلب بنجاح!');
           // يمكن إضافة إعادة توجيه إلى الصفحة الرئيسية أو صفحة الشكر
           window.location.href = 'index.html'; // استبدلها إذا لزم الأمر
@@ -169,4 +178,5 @@
   </script>
 </body>
 </html>
+
 
