@@ -160,7 +160,7 @@
         .then(() => {
           // تحديث الكميات في قاعدة بيانات المنتجات
 cart.forEach(item => {
-  const productRef = db.ref('products/' + item.name + '/qty');
+  const productRef = db.ref('products/' + item.id + '/qty');
   productRef.transaction(currentQty => {
     if (currentQty === null) return 0; // المنتج غير موجود
     const newQty = currentQty - item.qty;
@@ -178,5 +178,6 @@ cart.forEach(item => {
   </script>
 </body>
 </html>
+
 
 
