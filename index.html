@@ -279,9 +279,11 @@ function updateCartUI() {
 }
 
 document.getElementById('cartBtn').addEventListener('click', () => {
-  const panel=document.getElementById('cartPanel');
-  panel.style.display=panel.style.display==='none'?'block':'none';
+  const panel = document.getElementById('cartPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
   renderCart();
+  // هنا نضيف السحب إلى الأسفل
+  panel.scrollIntoView({ behavior: 'smooth' });
 });
 
 function renderCart() {
@@ -369,4 +371,5 @@ loadSpecialPrices();
 </script>
 </body>
 </html>
+
 
