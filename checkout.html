@@ -163,7 +163,7 @@
         .then(() => {
           // تحديث الكميات في قاعدة بيانات المنتجات
 cart.forEach(item => {
-  if (item.id === 0) {
+  if (item.name === "جبنة شركسية") {
     // حذف الخيار المطلوب من prices حسب الوزن والسعر
     const pricesRef = db.ref('products/' + item.id + '/prices');
     pricesRef.once('value').then(snapshot => {
@@ -198,6 +198,7 @@ cart.forEach(item => {
   </script>
 </body>
 </html>
+
 
 
 
