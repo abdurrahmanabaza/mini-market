@@ -97,9 +97,9 @@
     const cartItemsUl = document.getElementById('cartItems');
     const cartTotalSpan = document.getElementById('cartTotal');
 
-    let productId = 'put_here_product_id'; // حدد معرف المنتج بشكل صحيح
+    let productId = '0'; // حدد معرف المنتج بشكل صحيح
 
-    // عند تحميل الصفحة
+    // تحميل البيانات من التخزين المحلي عند تحميل الصفحة
     window.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('userData');
       if (saved) {
@@ -123,8 +123,8 @@
       }
     });
 
-    // دالة لحذف سعر أو وزن معين من قائمة الأسعار
-    function deletePrice(index, productId, weight, price) {
+    // دالة لحذف سعر بناءً على السعر والوزن
+    function deletePrice(productId, weight, price) {
       const pricesRef = firebase.database().ref('products/' + productId + '/prices');
       pricesRef.once('value').then(snapshot => {
         const pricesData = snapshot.val();
@@ -133,10 +133,9 @@
         const pricesArray = Object.entries(pricesData).map(([key, value]) => ({ key, ...value }));
         const target = pricesArray.find(p => p.price === price && p.weight === weight);
         if (target) {
-          // حذف العنصر باستخدام المفتاح
           firebase.database().ref('products/' + productId + '/prices/' + target.key).remove().then(() => {
-            alert('تم الحذف');
-            loadProduct(); // استدعاء وظيفة لتحميل البيانات مجددًا
+            alert('تم حذف السعر بنجاح');
+            // هنا يمكنك إعادة تحميل البيانات إذا لزم الأمر
           }).catch((err) => {
             alert('خطأ في الحذف: ' + err.message);
           });
@@ -144,7 +143,7 @@
       });
     }
 
-    // عند تقديم النموذج
+    // عند إرسال النموذج
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = userNameInput.value.trim();
@@ -171,20 +170,20 @@
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         status: 'pending'
       };
+
       const submitBtn = document.getElementById('submitOrder');
       submitBtn.disabled = true;
       submitBtn.textContent = 'جاري إرسال الطلب...';
 
       db.ref('userOrders').push(newOrder)
         .then(() => {
-          // تحديث الكميات في قاعدة البيانات
+          // تحديث الكميات أو حذف السعر إذا كان المنتج قطعة جبنة شركسية
           cart.forEach(item => {
             if (item.id === 0) {
-              console.log('شراء قطعة جبنة شركسية، سيتم حذف السعر:', item);
-              // حذف السعر أو الوزن من قائمة الأسعار
-              deletePrice(item.index, item.productId, item.weight, item.price);
+              // مثال على حذف السعر بناءً على السعر والوزن
+              deletePrice(item.productId, item.weight, item.price);
             } else {
-              // خصم الكمية
+              // خصم الكمية من المخزون
               const productRef = db.ref('products/' + item.id + '/quantity');
               productRef.transaction(currentQty => {
                 if (currentQty === null || typeof item.qty !== 'number') return currentQty;
@@ -194,7 +193,7 @@
             }
           });
           alert('تم إرسال الطلب بنجاح!');
-          window.location.href = 'index.html'; // استبدالها حسب الحاجة
+          window.location.href = 'index.html'; // توجه حسب الحاجة
         })
         .catch((err) => {
           submitBtn.disabled = false;
@@ -202,12 +201,6 @@
           alert('حدث خطأ أثناء الإرسال: ' + err.message);
         });
     });
-
-    // وظيفة لتحميل بيانات المنتج عند الحاجة (ممكن تكتبها حسب الحاجة)
-    function loadProduct() {
-      // أضف هنا الكود الخاص بتحديث البيانات عند الحذف أو التحديث
-    }
   </script>
 </body>
 </html>
-
