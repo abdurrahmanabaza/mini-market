@@ -125,6 +125,7 @@
 
     // دالة لحذف سعر بناءً على السعر والوزن
     function deletePrice(productId, weight, price) {
+      productId=number(productId);
       const pricesRef = firebase.database().ref('products/' + productId + '/prices');
       pricesRef.once('value').then(snapshot => {
         const pricesData = snapshot.val();
@@ -134,10 +135,10 @@
         const target = pricesArray.find(p => p.price === price && p.weight === weight);
         if (target) {
           firebase.database().ref('products/' + productId + '/prices/' + target.key).remove().then(() => {
-            alert('تم حذف السعر بنجاح');
+          
             // هنا يمكنك إعادة تحميل البيانات إذا لزم الأمر
           }).catch((err) => {
-            alert('خطأ في الحذف: ' + err.message);
+          
           });
         }
       });
@@ -204,4 +205,5 @@
   </script>
 </body>
 </html>
+
 
