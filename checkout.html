@@ -179,7 +179,7 @@
         .then(() => {
           // تحديث الكميات أو حذف السعر إذا كان المنتج قطعة جبنة شركسية
           cart.forEach(item => {
-            if (item.id === 0) {
+            if (item.name === 'جبنة شركسية') {
               // مثال على حذف السعر بناءً على السعر والوزن
               deletePrice(item.productId, item.weight, item.price);
             } else {
@@ -204,3 +204,4 @@
   </script>
 </body>
 </html>
+
