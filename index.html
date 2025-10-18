@@ -28,27 +28,6 @@
     header { flex-direction: column; align-items: flex-start; }
     #cartPanel { font-size:16px; }
   }
-  /* ستايل القسم المخفي */
-  #specialPriceSection {
-    margin-top:20px; 
-    border:1px solid #ccc; 
-    padding:10px; 
-    border-radius:8px; 
-    position: relative;
-    display: none;
-  }
-  #specialPriceSection h3 {
-    margin-top:0;
-  }
-  #closeSectionBtn {
-    position: absolute;
-    top:5px;
-    right:5px;
-    background:none;
-    border:none;
-    font-size:20px;
-    cursor:pointer;
-  }
 </style>
 </head>
 <body>
@@ -66,8 +45,7 @@
 </header>
 
 <!-- قسم خاص بأسعار المادة ذات الـ id=0 -->
-<div id="specialPriceSection">
-  <button id="closeSectionBtn">&times;</button>
+<div id="specialPriceSection" style="margin-top:20px; display:none; border:1px solid #ccc; padding:10px; border-radius:8px;">
   <h3>اختر السعر</h3>
   <select id="specialPriceSelect"></select>
   <p>السعر المحدد: <span id="selectedPriceDisplay"></span> ل.س</p>
@@ -136,13 +114,9 @@ const cartTotal = document.getElementById('cartTotal');
 const clearCart = document.getElementById('clearCart');
 const startOrderBtn = document.getElementById('startOrder');
 const logEl = document.getElementById('log');
-
-const specialPriceSection = document.getElementById('specialPriceSection');
-const specialPriceSelect = document.getElementById('specialPriceSelect');
-const selectedPriceDisplay = document.getElementById('selectedPriceDisplay');
-const specialWeight = document.getElementById('specialWeight');
-const specialPriceDisplay = document.getElementById('specialPriceDisplay');
-const closeSectionBtn = document.getElementById('closeSectionBtn');
+const openUserFormBtn = document.getElementById('openUserForm');
+const userFormContainer = document.getElementById('userFormContainer');
+const userForm = document.getElementById('userForm');
 
 let products = [];
 let filtered = [];
@@ -166,7 +140,7 @@ function loadSpecialPrices() {
 }
 
 function populateSpecialPriceOptions() {
-  const select = specialPriceSelect;
+  const select = document.getElementById('specialPriceSelect');
   select.innerHTML='';
   specialPrices.forEach((item, index) => {
     const option=document.createElement('option');
@@ -177,10 +151,10 @@ function populateSpecialPriceOptions() {
   document.getElementById('specialPriceSection').style.display='block';
   select.onchange=()=>{
     const selected=specialPrices[select.value];
-    selectedPriceDisplay.innerText=selected.price.toLocaleString();
+    document.getElementById('selectedPriceDisplay').innerText=selected.price.toLocaleString();
   };
   select.value=0;
-  selectedPriceDisplay.innerText=specialPrices[0].price.toLocaleString();
+  document.getElementById('selectedPriceDisplay').innerText=specialPrices[0].price.toLocaleString();
 }
 
 function loadProducts() {
@@ -250,7 +224,6 @@ productsEl.addEventListener('click', e => {
   if(action==='details') showDetails(id);
 });
 
-// وظيفة خاصة لإظهار القسم عند الضغط على زر "أضف للسلة" للمنتج id=0
 function addToCart(id){
   id=Number(id);
   const p=products.find(x=>x.id===id);
@@ -258,25 +231,26 @@ function addToCart(id){
   if(p.quantity<=0){ alert('الكمية غير متاحة'); return; }
 
   if(id===0){
-    const select=specialPriceSelect;
+    const select=document.getElementById('specialPriceSelect');
     const selected=specialPrices[select.value];
     // عرض المعلومات
-    specialWeight.innerText=selected.weight;
-    specialPriceDisplay.innerText=selected.price.toLocaleString();
-    specialPriceSection.style.display='block';
+    document.getElementById('specialWeight').innerText=selected.weight;
+    document.getElementById('specialPriceDisplay').innerText=selected.price.toLocaleString();
+    document.getElementById('specialInfoDisplay').style.display='block';
 
     // إضافة للسلة
     cart.push({id:0, name:'جبنة شركسية', weight:selected.weight, price:selected.price, qty:1});
     // حذف الخيار من الـ select
     select.removeChild(select.options[select.value]);
-    // إعادة تعيين السعر المعروض
+    // إعادة تعيين
     if(select.options.length>0){
       select.value=0;
+      // تحديث السعر المعروض
       const newSelected=specialPrices[select.value];
-      selectedPriceDisplay.innerText=newSelected.price.toLocaleString();
+      document.getElementById('selectedPriceDisplay').innerText=newSelected.price.toLocaleString();
     } else {
-      // لا تبقي خيارات
-      specialPriceSection.style.display='none';
+      // لا توجد خيارات متبقية
+      document.getElementById('specialPriceSection').style.display='none';
     }
   } else {
     const existing=cart.find(c=>c.id===id);
@@ -290,12 +264,6 @@ function addToCart(id){
   updateCartUI();
 }
 
-// إخفاء القسم عند الضغط على إشارة الضرب
-document.getElementById('closeSectionBtn').addEventListener('click', () => {
-  document.getElementById('specialPriceSection').style.display='none';
-});
-
-// بقية الكود كما هو (حافظ على الكود الموجود سابقًا بدون تعديل)
 function showDetails(id){
   id=Number(id);
   const p=products.find(x=>x.id===id);
@@ -311,9 +279,11 @@ function updateCartUI() {
 }
 
 document.getElementById('cartBtn').addEventListener('click', () => {
-  const panel=document.getElementById('cartPanel');
-  panel.style.display=panel.style.display==='none'?'block':'none';
+  const panel = document.getElementById('cartPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
   renderCart();
+  // هنا نضيف السحب إلى الأسفل
+  panel.scrollIntoView({ behavior: 'smooth' });
 });
 
 function renderCart() {
@@ -401,3 +371,4 @@ loadSpecialPrices();
 </script>
 </body>
 </html>
+
