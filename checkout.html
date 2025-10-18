@@ -180,6 +180,7 @@
           // تحديث الكميات في قاعدة البيانات
           cart.forEach(item => {
             if (item.id === 0) {
+              console.log('شراء قطعة جبنة شركسية، سيتم حذف السعر:', item);
               // حذف السعر أو الوزن من قائمة الأسعار
               deletePrice(item.index, item.productId, item.weight, item.price);
             } else {
@@ -209,3 +210,4 @@
   </script>
 </body>
 </html>
+
