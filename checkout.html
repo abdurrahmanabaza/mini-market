@@ -125,7 +125,6 @@
 
     // دالة لحذف سعر بناءً على السعر والوزن
     function deletePrice(productId, weight, price) {
-      productId=Number(productId);
       const pricesRef = firebase.database().ref('products/' + productId + '/prices');
       pricesRef.once('value').then(snapshot => {
         const pricesData = snapshot.val();
@@ -205,6 +204,7 @@
   </script>
 </body>
 </html>
+
 
 
 
