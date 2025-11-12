@@ -125,7 +125,7 @@
 
     // دالة لحذف سعر بناءً على السعر والوزن
     function deletePrice(productId, weight, price) {
-      productId=number(productId);
+      productId=Number(productId);
       const pricesRef = firebase.database().ref('products/' + productId + '/prices');
       pricesRef.once('value').then(snapshot => {
         const pricesData = snapshot.val();
@@ -187,7 +187,7 @@
               // خصم الكمية من المخزون
               const productRef = db.ref('products/' + item.id + '/quantity');
               productRef.transaction(currentQty => {
-                if (currentQty === null || typeof item.qty !== 'number') return currentQty;
+                if (currentQty === null || typeof item.qty !== 'Number') return currentQty;
                 const newQty = currentQty - item.qty;
                 return newQty >= 0 ? newQty : currentQty;
               });
@@ -205,5 +205,6 @@
   </script>
 </body>
 </html>
+
 
 
